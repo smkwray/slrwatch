@@ -1,0 +1,27 @@
+{
+  "coverage": {
+    "linked_observations": 100,
+    "bank_subsidiaries": 20,
+    "parent_families": 15,
+    "quarters": 5,
+    "period": "2020-Q4 to 2021-Q4"
+  },
+  "co_movement": {
+    "ust_holdings": { "same_direction": 60, "total": 80, "pct": 75 },
+    "trading_assets": { "same_direction": 48, "total": 80, "pct": 60 }
+  },
+  "surcharge_comparison": {
+    "high_surcharge": {
+      "bank_ust_assets": 0.0926,
+      "bank_headroom_pp": 0.0087,
+      "parent_trading_assets": 0.1401,
+      "obs": 16
+    },
+    "low_surcharge": {
+      "bank_ust_assets": 0.0936,
+      "bank_headroom_pp": 0.0190,
+      "parent_trading_assets": 0.1293,
+      "obs": 24
+    }
+  }
+}

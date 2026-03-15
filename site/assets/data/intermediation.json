@@ -1,0 +1,14 @@
+{
+  "net_changes": [
+    { "treatment": "Low Headroom", "trading_assets": -0.0171, "treasury_inventory": 0.0247 },
+    { "treatment": "Covered Bank", "trading_assets": -0.0053, "treasury_inventory": 0.0197 }
+  ],
+  "market_correlations": [
+    { "treatment": "Low Headroom", "outcome": "Trading Assets", "market_var": "Dealer Net UST Position", "corr": 0.823 },
+    { "treatment": "High UST Share", "outcome": "Trading Assets", "market_var": "Dealer Net UST Position", "corr": 0.785 },
+    { "treatment": "High UST Share", "outcome": "Treasury Inventory", "market_var": "Dealer Net UST Position", "corr": 0.716 },
+    { "treatment": "High UST Share", "outcome": "Trading Assets", "market_var": "UST Repo", "corr": 0.714 },
+    { "treatment": "Covered Bank", "outcome": "Trading Assets", "market_var": "UST Repo", "corr": 0.661 },
+    { "treatment": "Covered Bank", "outcome": "Trading Assets", "market_var": "UST Reverse Repo", "corr": 0.655 }
+  ]
+}

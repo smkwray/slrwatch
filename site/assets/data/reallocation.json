@@ -1,0 +1,14 @@
+{
+  "treatments": ["Low Headroom", "Covered Bank"],
+  "outcomes": ["Treasury Inventory", "Fed Balances", "Deposit Growth", "Loan Growth"],
+  "data": [
+    { "treatment": "Low Headroom", "outcome": "Treasury Inventory", "treated": 0.0285, "control": 0.0038, "net": 0.0247 },
+    { "treatment": "Low Headroom", "outcome": "Fed Balances", "treated": 0.0526, "control": 0.0500, "net": 0.0026 },
+    { "treatment": "Low Headroom", "outcome": "Deposit Growth", "treated": -0.0525, "control": -0.0173, "net": -0.0352 },
+    { "treatment": "Low Headroom", "outcome": "Loan Growth", "treated": -0.0399, "control": -0.0234, "net": -0.0165 },
+    { "treatment": "Covered Bank", "outcome": "Treasury Inventory", "treated": 0.0229, "control": 0.0032, "net": 0.0197 },
+    { "treatment": "Covered Bank", "outcome": "Fed Balances", "treated": 0.0487, "control": 0.0532, "net": -0.0045 },
+    { "treatment": "Covered Bank", "outcome": "Deposit Growth", "treated": -0.0504, "control": -0.0106, "net": -0.0398 },
+    { "treatment": "Covered Bank", "outcome": "Loan Growth", "treated": -0.0412, "control": -0.0180, "net": -0.0232 }
+  ]
+}

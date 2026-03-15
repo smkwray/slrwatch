@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slr-watch"
+version = "0.1.0"
+description = "Starter repo for a large-bank SLR and Treasury-capacity monitor"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.12",
+  "duckdb>=1.1",
+  "matplotlib>=3.9",
+  "openpyxl>=3.1",
+  "pandas>=2.2",
+  "playwright>=1.58",
+  "pyarrow>=16",
+  "PyYAML>=6.0",
+  "requests>=2.32",
+  "statsmodels>=0.14",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+slr-watch = "slr_watch.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = ["-p", "no:cacheprovider"]
+pythonpath = ["src"]
+testpaths = ["tests"]

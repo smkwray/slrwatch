@@ -1,0 +1,6 @@
+entity_id,entity_name,quarter_end,entity_type,slr_applies,is_gsib_parent,is_covered_bank_subsidiary,parent_method1_surcharge,actual_slr,tier1_capital,total_leverage_exposure,early_adopter
+demo_parent_pre,Demo GSIB Parent (pre rule),2025-12-31,bhc_parent,True,True,False,0.045,0.055,55.0,1000.0,False
+demo_parent_post,Demo GSIB Parent (post rule),2026-04-01,bhc_parent,True,True,False,0.045,0.055,55.0,1000.0,False
+demo_sub_post,Demo Covered Bank Subsidiary,2026-04-01,insured_bank_sub,True,False,True,0.045,0.041,41.0,1000.0,False
+demo_control,Demo Large Bank Control,2025-12-31,insured_bank_sub,True,False,False,,0.038,38.0,1000.0,False
+demo_ihc,Demo Foreign IHC,2026-01-15,ihc_fbo_us,True,False,False,,0.034,34.0,1000.0,True

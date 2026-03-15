@@ -1,0 +1,36 @@
+{
+  "samples": {
+    "broad": { "observations": 232, "entities": 21 },
+    "flagship": { "observations": 180, "entities": 15 }
+  },
+  "coefficients": [
+    {
+      "treatment": "Low Headroom",
+      "outcome": "Treasury Inventory / Assets",
+      "broad": { "coef": 0.0247, "p": 0.0021 },
+      "flagship": { "coef": 0.0178, "p": 0.0515 },
+      "flagship_clustered": { "coef": 0.0178, "p": 0.1762 }
+    },
+    {
+      "treatment": "Covered Bank",
+      "outcome": "Treasury Inventory / Assets",
+      "broad": { "coef": 0.0197, "p": 0.0054 },
+      "flagship": { "coef": 0.0206, "p": 0.0055 },
+      "flagship_clustered": { "coef": 0.0206, "p": 0.1626 }
+    },
+    {
+      "treatment": "High UST Share",
+      "outcome": "Treasury Inventory / Assets",
+      "broad": { "coef": 0.0023, "p": 0.8133 },
+      "flagship": { "coef": 0.0021, "p": 0.8348 },
+      "flagship_clustered": { "coef": 0.0021, "p": 0.9059 }
+    },
+    {
+      "treatment": "High UST Share",
+      "outcome": "Trading Assets / Assets",
+      "broad": { "coef": -0.0213, "p": 0.0137 },
+      "flagship": { "coef": -0.0214, "p": 0.0134 },
+      "flagship_clustered": { "coef": -0.0214, "p": 0.1717 }
+    }
+  ]
+}

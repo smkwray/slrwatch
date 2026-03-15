@@ -1,0 +1,139 @@
+variables:
+  tier1_capital:
+    description: Tier 1 capital allowable under the risk-based capital guidelines.
+    fields:
+      fry9c: ["BHCA8274"]
+      call_report: ["RCFA8274"]
+    status: ready
+
+  total_leverage_exposure:
+    description: Total leverage exposure used in the supplementary leverage ratio.
+    fields:
+      fry9c: ["BHCALE88"]
+      call_report: ["RCFAH015"]
+    notes: >
+      Parent-level FR Y-9C availability is more recent than the bank-subsidiary
+      Call Report series; use FFIEC 101 as a historical backfill if needed.
+    status: ready
+
+  actual_slr_ratio:
+    description: Supplementary leverage ratio.
+    preferred_derivation: "tier1_capital / total_leverage_exposure"
+    fields:
+      call_report: ["RCFAH036"]
+    notes: >
+      Prefer direct ratio if it is clean and applicable; otherwise derive.
+
+  ust_htm_amortized:
+    description: Held-to-maturity U.S. Treasury securities at amortized cost.
+    fields:
+      fry9c: ["BHCK0211"]
+      call_report: ["RCFD0211", "RCON0211"]
+    status: ready
+
+  ust_htm_fair_value:
+    description: Held-to-maturity U.S. Treasury securities at fair value.
+    fields:
+      fry9c: ["BHCK0213"]
+      call_report: ["RCFD0213", "RCON0213"]
+    status: ready
+
+  ust_afs_amortized:
+    description: Available-for-sale U.S. Treasury securities at amortized cost.
+    fields:
+      fry9c: ["BHCK1286"]
+      call_report: ["RCFD1286", "RCON1286"]
+    status: ready
+
+  ust_afs_fair_value:
+    description: Available-for-sale U.S. Treasury securities at fair value.
+    fields:
+      fry9c: ["BHCK1287"]
+      call_report: ["RCFD1287", "RCON1287"]
+    status: ready
+
+  ust_trading_assets:
+    description: Trading assets - U.S. Treasury securities.
+    fields:
+      fry9c: ["BHCM3531", "BHCK3531"]
+      call_report: ["RCFD3531", "RCFN3531", "RCON3531"]
+    notes: >
+      FR Y-9C field family changes around 2008; keep both candidates.
+
+  balances_due_from_fed:
+    description: Balances due from Federal Reserve Banks.
+    fields:
+      fry9c: ["BHCK0090"]
+      call_report: ["RCFD0090", "RCON0090"]
+    status: ready
+
+  total_assets:
+    description: Total consolidated assets.
+    fields:
+      fry9c: ["BHCK2170"]
+      call_report: ["RCFD2170", "RCON2170"]
+    status: ready
+
+  average_total_assets:
+    description: Average total consolidated assets.
+    fields:
+      call_report: ["RCFAKW03"]
+      fry9c: ["BHCK3368"]
+    status: candidate
+
+  trading_assets_total:
+    description: Total trading assets.
+    fields:
+      fry9c: ["BHCK3545", "BHCM3545"]
+      call_report: ["RCFD3545", "RCON3545"]
+    status: candidate
+
+  reverse_repos:
+    description: Securities purchased under agreements to resell.
+    fields:
+      fry9c: ["BHDM1350", "BHCK1350"]
+      call_report: ["RCFD1350", "RCON1350"]
+    status: candidate
+
+  repos:
+    description: Securities sold under agreements to repurchase.
+    fields:
+      fry9c: ["BHFN2800", "BHCK2800"]
+      call_report: ["RCFD2800", "RCON2800"]
+    status: candidate
+
+  deposits:
+    description: Total deposits.
+    fields:
+      fry9c: ["BHCB2200", "BHCK2200"]
+      call_report: ["RCON2200", "RCFD2200"]
+    status: candidate
+
+  loans:
+    description: Total loans and leases, net of unearned income.
+    fields:
+      fry9c: ["BHCK2122"]
+      call_report: ["RCON2122", "RCFD2122"]
+    status: candidate
+
+derived_metrics:
+  actual_slr:
+    formula: "tier1_capital / total_leverage_exposure"
+
+  required_slr:
+    formula: "rule engine output"
+
+  headroom_pp:
+    formula: "actual_slr - required_slr"
+
+  headroom_dollars:
+    formula: "tier1_capital / required_slr - total_leverage_exposure"
+
+  ust_inventory_fv:
+    formula: "ust_htm_fair_value + ust_afs_fair_value + ust_trading_assets"
+
+  ust_share_assets:
+    formula: "ust_inventory_fv / total_assets"
+
+  ust_share_headroom:
+    formula: "ust_inventory_fv / headroom_dollars"

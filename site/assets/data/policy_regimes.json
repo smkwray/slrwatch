@@ -1,0 +1,43 @@
+{
+  "regimes": [
+    { "name": "Pre-Exclusion", "id": "pre_exclusion", "period": "through 2020-Q1" },
+    { "name": "Temporary Exclusion", "id": "temporary_exclusion", "period": "2020-Q2 to 2021-Q1" },
+    { "name": "Post-Exclusion", "id": "post_exclusion", "period": "2021-Q2 to 2022-Q1" },
+    { "name": "QT Era", "id": "qt_era", "period": "2022-Q2 onward" }
+  ],
+  "metrics": [
+    {
+      "label": "Insured-Bank Treasury Share",
+      "pre_exclusion": 0.0615,
+      "temporary_exclusion": 0.0645,
+      "post_exclusion": null,
+      "qt_era": null
+    },
+    {
+      "label": "Insured-Bank Fed-Balance Share",
+      "pre_exclusion": 0.0775,
+      "temporary_exclusion": 0.1509,
+      "post_exclusion": null,
+      "qt_era": null
+    },
+    {
+      "label": "Parent Trading-Assets Share",
+      "pre_exclusion": null,
+      "temporary_exclusion": 0.0966,
+      "post_exclusion": null,
+      "qt_era": 0.0903
+    }
+  ],
+  "market": [
+    {
+      "label": "NY Fed Dealer Net UST Position ($M)",
+      "temporary_exclusion": 229416.5,
+      "qt_era": 303042.375
+    },
+    {
+      "label": "TRACE Total Par Volume ($B)",
+      "temporary_exclusion": 36946.0,
+      "qt_era": 52632.4
+    }
+  ]
+}

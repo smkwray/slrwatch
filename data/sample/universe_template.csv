@@ -1,0 +1,5 @@
+entity_id,entity_name,entity_type,rssd_id,fdic_cert,top_parent_rssd,country,is_gsib_parent,is_covered_bank_subsidiary,fr_y15_reporter,parent_method1_surcharge
+demo_parent,Demo GSIB Parent,bhc_parent,,,,United States,true,false,DEMO_PARENT,
+demo_bank,Demo Covered Bank,insured_bank_sub,,,,United States,false,true,,
+demo_ihc,Demo Foreign IHC,ihc_fbo_us,,,,United States,false,false,DEMO_IHC,
+demo_branch,Demo Foreign Branch,foreign_branch_agency_us,,,,United States,false,false,,

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="SLR Watch monitors how Supplementary Leverage Ratio pressure shapes large-bank Treasury holdings and balance-sheet behavior using free public regulatory data.">
+  <title>SLR Watch &mdash; Large-Bank Balance-Sheet Capacity Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ================================================================== -->
+<!-- NAV                                                                 -->
+<!-- ================================================================== -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">SLR<span>Watch</span></a>
+    <ul class="nav-links">
+      <li><a href="#findings">Findings</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#mechanism">Mechanism</a></li>
+      <li><a href="#context">Context</a></li>
+      <li><a href="#data">Data</a></li>
+      <li><a href="#reports">Reports</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme"></button>
+      <button class="nav-menu-btn" aria-label="Toggle menu">&#9776;</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ================================================================== -->
+<!-- HERO                                                               -->
+<!-- ================================================================== -->
+<header class="hero">
+  <div class="container">
+    <p class="label">Public-Data Research Monitor</p>
+    <h1>SLR Watch</h1>
+    <p class="thesis">
+      Monitoring how the Supplementary Leverage Ratio shapes large-bank
+      Treasury holdings and balance-sheet behavior&mdash;using free public
+      regulatory data from FFIEC Call Reports, FR&nbsp;Y-9C, FR&nbsp;Y-15,
+      NY&nbsp;Fed dealer statistics, and FINRA&nbsp;TRACE.
+    </p>
+  </div>
+</header>
+
+<!-- ================================================================== -->
+<!-- KEY HIGHLIGHTS                                                     -->
+<!-- ================================================================== -->
+<section class="section" id="highlights">
+  <div class="container">
+    <div class="highlights reveal">
+      <div class="highlight-card">
+        <div class="stat positive">+2.47pp</div>
+        <div class="stat-label">Treasury Inventory Increase</div>
+        <div class="stat-desc">
+          Low-headroom banks increased Treasury holdings relative to controls
+          after the 2020 temporary SLR exclusion (broad sample, p&nbsp;=&nbsp;0.002).
+        </div>
+      </div>
+      <div class="highlight-card">
+        <div class="stat positive">+9.86pp</div>
+        <div class="stat-label">Safe-Asset Composition Shift</div>
+        <div class="stat-desc">
+          Covered-bank subsidiaries shifted their safe-asset mix toward
+          Treasuries rather than Fed reserve balances.
+        </div>
+      </div>
+      <div class="highlight-card">
+        <div class="stat neutral">75%</div>
+        <div class="stat-label">Family Co-Movement</div>
+        <div class="stat-desc">
+          Bank and parent Treasury-share changes moved in the same direction
+          in three-quarters of linked quarter-over-quarter comparisons.
+        </div>
+      </div>
+    </div>
+
+    <div class="caveat reveal" style="margin-top:32px">
+      <strong>Inference note.</strong> Under parent-level clustering in the
+      flagship sample (15 clusters), the headline Treasury coefficients
+      retain their sign and approximate magnitude but lose conventional
+      significance (p&nbsp;&asymp;&nbsp;0.17). The right language is
+      <em>directional evidence</em>, not a settled causal estimate.
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- FINDINGS                                                           -->
+<!-- ================================================================== -->
+<section class="section" id="findings">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Core Results</p>
+      <h2>Event-Study Findings</h2>
+      <p class="lead">
+        The flagship design compares balance-sheet-constrained banks to
+        less-constrained peers around the April&nbsp;2020 temporary SLR exclusion.
+        Constrained banks&mdash;especially covered-bank subsidiaries&mdash;appear
+        to have increased Treasury holdings more than comparison banks.
+      </p>
+    </div>
+
+    <!-- Dot Plot -->
+    <div class="chart-wrapper reveal">
+      <div class="chart-title">Coefficient Comparison: Treasury Inventory / Assets</div>
+      <div class="chart-subtitle">
+        DiD coefficient across three sample/specification variants &middot; Outcome: Treasury inventory scaled by total assets
+      </div>
+      <div class="chart-container" id="chart-dot-plot"></div>
+      <div class="chart-legend">
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--chart-1)"></div>
+          Broad sample (HC1)
+        </div>
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--chart-2)"></div>
+          Flagship per-parent (HC1)
+        </div>
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--chart-3);opacity:0.5;border:2px solid var(--chart-3)"></div>
+          Flagship clustered (parent)
+        </div>
+        <div class="chart-legend-item" style="margin-left:12px;color:var(--text-tertiary)">
+          Filled = p &lt; 0.05 &nbsp;|&nbsp; Hollow = p &ge; 0.05
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 reveal" style="margin-top:32px">
+      <div class="card">
+        <h4>What holds up</h4>
+        <p>
+          The <code>low_headroom_treated</code> and
+          <code>covered_bank_treated</code> coefficients are positive and
+          economically meaningful across all three sample variants. In the
+          broad sample, both are significant at the 1% level.
+        </p>
+      </div>
+      <div class="card">
+        <h4>What does not</h4>
+        <p>
+          The <code>high_ust_share_treated</code> coefficient is near zero
+          and insignificant everywhere. The flagship-clustered results lose
+          conventional significance, so the headline should be framed as
+          suggestive rather than definitive.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sample details -->
+    <div class="stat-grid reveal" style="margin-top:32px">
+      <div class="stat-item">
+        <div class="stat-value">232</div>
+        <div class="stat-label">Broad sample observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">21</div>
+        <div class="stat-label">Distinct entities (broad)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">180</div>
+        <div class="stat-label">Flagship sample observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">15</div>
+        <div class="stat-label">Parent clusters (flagship)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- METHOD                                                             -->
+<!-- ================================================================== -->
+<section class="section" id="method">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Research Design</p>
+      <h2>Method</h2>
+      <p class="lead">
+        A panel event study around the April&nbsp;2020 temporary SLR exclusion,
+        using difference-in-differences with entity and time fixed effects.
+      </p>
+    </div>
+
+    <!-- Background -->
+    <div class="subsection reveal">
+      <h3>Why SLR Matters for Treasury Markets</h3>
+      <p>
+        The Supplementary Leverage Ratio requires large banks to hold Tier&nbsp;1 capital
+        against <em>all</em> on-balance-sheet assets and certain off-balance-sheet
+        exposures, without risk-weighting. Unlike risk-based capital ratios, SLR
+        treats Treasuries the same as corporate loans in the denominator. For banks
+        near the binding constraint, every dollar of Treasuries consumes scarce
+        leverage capacity&mdash;creating a direct link between capital regulation
+        and Treasury-market intermediation.
+      </p>
+      <p>
+        GSIB parent holding companies face a 5% enhanced SLR (eSLR) minimum, while
+        their covered insured-bank subsidiaries must maintain 6% to be classified as
+        well-capitalized. The 2025 final rule recalibrates these buffers to
+        <code>3% + 0.5 &times; method&nbsp;1 surcharge</code> for parents and
+        <code>3% + min(1pp, 0.5 &times; parent surcharge)</code> for subsidiaries,
+        effective April&nbsp;2026.
+      </p>
+    </div>
+
+    <!-- Natural Experiment -->
+    <div class="subsection reveal">
+      <h3>The 2020 Natural Experiment</h3>
+      <p>
+        On April&nbsp;1, 2020, the Federal Reserve temporarily excluded U.S. Treasury
+        securities and deposits at Federal Reserve Banks from the SLR denominator
+        for holding companies. The exclusion expired on March&nbsp;31, 2021. This
+        created a clean before/during/after window for estimating how leverage-ratio
+        relief affects bank Treasury demand.
+      </p>
+      <p>
+        The event window runs from 2019&ndash;Q1 through 2021&ndash;Q4, with
+        the pre-period ending at 2020&ndash;Q1 and the post-treatment period
+        beginning at 2020&ndash;Q2. This gives four pre-treatment quarters
+        and seven post-treatment quarters.
+      </p>
+    </div>
+
+    <!-- Design -->
+    <div class="method-flow reveal">
+      <div class="method-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Sample Construction</h4>
+          <p>
+            The universe covers U.S. GSIB parents, major insured-bank subsidiaries,
+            large non-GSIB controls, and U.S. IHCs of foreign banking organizations.
+            The <strong>broad sample</strong> includes 21 entities (232 bank-quarter
+            observations). The <strong>flagship per-parent sample</strong> restricts
+            to the single largest insured subsidiary per parent family&mdash;15 entities,
+            15 parent clusters, 180 observations&mdash;to avoid double-counting families
+            with multiple large subsidiaries.
+          </p>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Treatment Definitions</h4>
+          <p>
+            Three treatment arms, each splitting the sample on a pre-shock characteristic
+            measured as of 2019&ndash;Q4:
+          </p>
+          <ul style="margin-top:8px;padding-left:20px;list-style:disc">
+            <li><strong>Low SLR headroom</strong> &mdash; banks whose pre-shock headroom
+              (actual SLR minus required SLR) fell below the sample median. These banks
+              had the most to gain from the exclusion.</li>
+            <li><strong>Covered-bank subsidiary</strong> &mdash; insured depositories
+              subject to the 6% well-capitalized threshold, versus non-covered peers
+              facing only the 3% minimum. This captures the regulatory intensity channel.</li>
+            <li><strong>High pre-shock Treasury share</strong> &mdash; banks with above-median
+              Treasury inventory as a share of assets. This arm tests whether banks already
+              holding more Treasuries responded differently; it does not produce a robust result.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Specification</h4>
+          <p>
+            The baseline is a two-way fixed-effects difference-in-differences model:
+          </p>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:0.88rem;margin:12px 0;padding:12px 16px;background:var(--bg-code);border-radius:6px">
+            Y<sub>it</sub> = &alpha;<sub>i</sub> + &gamma;<sub>t</sub> + &beta; &middot; (Treated<sub>i</sub> &times; Post<sub>t</sub>) + &epsilon;<sub>it</sub>
+          </p>
+          <p>
+            Entity fixed effects (&alpha;<sub>i</sub>) absorb time-invariant bank
+            characteristics; quarter fixed effects (&gamma;<sub>t</sub>) absorb
+            common macro shocks including aggregate market conditions. The coefficient
+            of interest &beta; measures the differential change in outcomes for treated
+            banks after the exclusion. Standard errors use HC1 heteroskedasticity-robust
+            inference in the baseline, with parent-family clustering as the strictest check.
+          </p>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Outcome Variables</h4>
+          <p>
+            All outcomes are drawn from FFIEC Call Report schedules and scaled by
+            total assets to ensure comparability across bank sizes:
+          </p>
+          <ul style="margin-top:8px;padding-left:20px;list-style:disc">
+            <li><strong>Treasury inventory (fair value)</strong> &mdash; the primary outcome;
+              sum of HTM, AFS, and trading-account Treasuries</li>
+            <li><strong>Fed reserve balances</strong> &mdash; balances due from Federal Reserve Banks</li>
+            <li><strong>Reverse repos and trading assets</strong> &mdash; captures intermediation activity</li>
+            <li><strong>Deposit and loan growth</strong> &mdash; tracks whether changes reflect
+              reallocation or general balance-sheet expansion</li>
+          </ul>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Market Controls</h4>
+          <p>
+            Quarter-level market conditions&mdash;NY Fed primary-dealer positions,
+            UST repo volumes, and TRACE aggregate par value&mdash;are absorbed by
+            the quarter fixed effects in the baseline specification. The repo
+            additionally reports an interaction sensitivity
+            (Treated<sub>i</sub> &times; Post<sub>t</sub> &times; Market<sub>t</sub>)
+            and a weaker auxiliary specification without time fixed effects that
+            lets raw market levels enter directly. Neither overturns the baseline read.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="caveat reveal">
+      <strong>Clustered-inference caveat.</strong> With 15 parent clusters in the
+      flagship sample, asymptotic cluster-robust variance estimates are known to
+      over-reject. The repo reports both HC1 and parent-clustered standard errors;
+      readers should weight the clustered column as the conservative bound. The
+      headline coefficients retain their sign and approximate magnitude under
+      clustering, but p-values rise from &lt;&nbsp;0.01 to roughly 0.17.
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- MECHANISM                                                          -->
+<!-- ================================================================== -->
+<section class="section" id="mechanism">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Mechanism Evidence</p>
+      <h2>How Constrained Banks Responded</h2>
+      <p class="lead">
+        Five extension reports build a mechanism story: reallocation away from
+        other balance-sheet uses, a shift in safe-asset composition toward
+        Treasuries, consistency with family-level transmission, and a possible
+        reduction in trading-balance-sheet use.
+      </p>
+    </div>
+
+    <!-- Reallocation Heatmap -->
+    <div class="subsection reveal">
+      <h3>Balance-Sheet Reallocation</h3>
+      <p>
+        The Treasury response came alongside <em>weaker</em> expansion elsewhere
+        on the balance sheet. Constrained banks appear to reallocate scarce
+        capacity rather than simply growing everything.
+      </p>
+      <div class="chart-wrapper">
+        <div class="chart-title">Net Treated &minus; Control Change by Outcome</div>
+        <div class="chart-subtitle">
+          Positive = treated group changed more; Negative = control group changed more &middot; 2019&ndash;2021 event window
+        </div>
+        <table class="heatmap-table" id="heatmap-reallocation">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Treasury Inventory</th>
+              <th>Fed Balances</th>
+              <th>Deposit Growth</th>
+              <th>Loan Growth</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Low Headroom</td>
+              <td class="heatmap-cell-pos-strong">+2.47pp</td>
+              <td class="heatmap-cell-pos-light">+0.26pp</td>
+              <td class="heatmap-cell-neg-strong">&minus;3.52pp</td>
+              <td class="heatmap-cell-neg-light">&minus;1.65pp</td>
+            </tr>
+            <tr>
+              <td>Covered Bank</td>
+              <td class="heatmap-cell-pos-strong">+1.97pp</td>
+              <td class="heatmap-cell-neg-light">&minus;0.45pp</td>
+              <td class="heatmap-cell-neg-strong">&minus;3.98pp</td>
+              <td class="heatmap-cell-neg-light">&minus;2.32pp</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Safe-Asset Composition -->
+    <div class="subsection reveal">
+      <h3>Safe-Asset Composition</h3>
+      <p>
+        The main difference is composition <em>within</em> safe assets, not just
+        the level of Fed balances. Constrained banks shifted the safe-asset mix
+        toward Treasuries by roughly 9&ndash;10 percentage points more than controls.
+      </p>
+      <div class="chart-wrapper">
+        <div class="chart-title">Safe-Asset Reallocation</div>
+        <div class="chart-subtitle">
+          Net treated &minus; control change by safe-asset category
+        </div>
+        <div class="chart-container" id="chart-safe-assets"></div>
+        <div class="chart-legend">
+          <div class="chart-legend-item">
+            <div class="chart-legend-dot" style="background:var(--chart-1)"></div>
+            Treasury Share of Safe Assets
+          </div>
+          <div class="chart-legend-item">
+            <div class="chart-legend-dot" style="background:var(--chart-2)"></div>
+            Treasury Inventory / Assets
+          </div>
+          <div class="chart-legend-item">
+            <div class="chart-legend-dot" style="background:var(--chart-4)"></div>
+            Fed Balances / Assets
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intermediation Tradeoff -->
+    <div class="subsection reveal">
+      <h3>Treasury Intermediation Tradeoff</h3>
+      <p>
+        Constrained banks reduced trading-balance-sheet use while absorbing more
+        Treasuries. The strongest market linkages are between treated-minus-control
+        trading-assets gaps and NY Fed dealer-position context (correlation up to 0.82).
+      </p>
+      <div class="chart-wrapper">
+        <div class="chart-title">Trading Assets vs. Treasury Inventory</div>
+        <div class="chart-subtitle">
+          Net treated &minus; control change &middot; Top: trading assets (negative); Bottom: Treasury inventory (positive)
+        </div>
+        <div class="chart-container" id="chart-intermediation"></div>
+        <div class="chart-legend">
+          <div class="chart-legend-dot" style="background:var(--chart-3)"></div>
+          <span>Trading Assets / Assets</span>
+          <div class="chart-legend-dot" style="background:var(--chart-1);margin-left:16px"></div>
+          <span>Treasury Inventory / Assets</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parent Transmission -->
+    <div class="subsection reveal">
+      <h3>Parent&ndash;Bank Transmission</h3>
+      <p>
+        The insured-bank Treasury result sits inside broader family-level
+        balance-sheet behavior. Linked-family analysis covers 100 bank-parent
+        quarter observations across 15 parent families.
+      </p>
+      <div class="grid-2">
+        <div class="chart-wrapper">
+          <div class="chart-title">Directional Co-Movement</div>
+          <div class="chart-subtitle">
+            Share of quarter-over-quarter changes moving in the same direction for bank and parent
+          </div>
+          <div class="chart-container" id="chart-transmission"></div>
+        </div>
+        <div class="chart-wrapper">
+          <div class="chart-title">High vs. Low Surcharge Families</div>
+          <div class="chart-subtitle">
+            Dumbbell comparison: red = high surcharge, blue = low surcharge
+          </div>
+          <div class="chart-container" id="chart-surcharge"></div>
+          <div class="chart-legend">
+            <div class="chart-legend-dot" style="background:var(--chart-3)"></div>
+            <span>High-Surcharge Families</span>
+            <div class="chart-legend-dot" style="background:var(--chart-1);margin-left:16px"></div>
+            <span>Low-Surcharge Families</span>
+          </div>
+        </div>
+      </div>
+      <p class="small" style="margin-top:16px">
+        High-surcharge families show lower average bank headroom (0.87pp vs. 1.90pp),
+        consistent with tighter SLR constraints driving more pronounced balance-sheet
+        responses.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- CONTEXT                                                            -->
+<!-- ================================================================== -->
+<section class="section" id="context">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Broader View</p>
+      <h2>Policy Regime Context</h2>
+      <p class="lead">
+        A longer quarterly panel places the 2020 event in context. The temporary
+        exclusion window stands out most clearly in reserve accumulation, while
+        Treasury share rose modestly. Over the subsequent QT era, parent trading-assets
+        share declined as dealer positions and TRACE par volume grew.
+      </p>
+    </div>
+
+    <div class="chart-wrapper reveal">
+      <div class="chart-title">Regime Comparison</div>
+      <div class="chart-subtitle">
+        Key balance-sheet shares across policy periods (29 quarters, 2019&ndash;2026)
+      </div>
+      <div class="chart-container" id="chart-regimes"></div>
+      <div class="chart-legend">
+        <div class="chart-legend-dot" style="background:var(--chart-2)"></div>
+        <span>Earlier regime</span>
+        <div class="chart-legend-dot" style="background:var(--chart-1);margin-left:16px"></div>
+        <span>Later regime</span>
+      </div>
+    </div>
+
+    <div class="grid-2 reveal" style="margin-top:32px">
+      <div class="card">
+        <h4>Market Growth</h4>
+        <ul>
+          <li>NY Fed dealer net UST positions grew 118.9% over the full sample</li>
+          <li>UST repo volume grew 91.6%</li>
+          <li>TRACE total par volume grew 15.2%</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Balance-Sheet Shifts</h4>
+        <ul>
+          <li>Insured-bank Fed-balance share nearly doubled during the temporary exclusion (7.75% to 15.09%)</li>
+          <li>Parent trading-assets share fell from 9.66% to 9.03% between the exclusion and QT eras</li>
+          <li>Treasury share rose modestly from 6.15% to 6.45%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- DATA SOURCES                                                       -->
+<!-- ================================================================== -->
+<section class="section" id="data">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Public Data</p>
+      <h2>Data Sources</h2>
+      <p class="lead">
+        All data comes from free public regulatory filings and market-data APIs.
+        No proprietary feeds, no paywalled datasets.
+      </p>
+    </div>
+
+    <div class="grid-3 reveal">
+      <div class="source-card">
+        <div class="source-id">FFIEC Call Reports</div>
+        <h4>Insured-Bank Panel</h4>
+        <p>
+          The main empirical panel. Bulk schedule files provide bank-level total
+          leverage exposure, Tier 1 capital, Treasury holdings, Fed balances, repos,
+          trading assets, loans, and deposits.
+        </p>
+        <div class="source-meta">
+          <span>Quarterly</span>
+          <span>Automated</span>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-id">FR Y-9C</div>
+        <h4>Parent Holding Companies</h4>
+        <p>
+          Parent-level Tier 1 capital, total leverage exposure, Treasury holdings,
+          and trading assets. Historical files from the Chicago Fed archive;
+          current data via NIC automation.
+        </p>
+        <div class="source-meta">
+          <span>Quarterly</span>
+          <span>Automated</span>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-id">FR Y-15</div>
+        <h4>Systemic Risk Indicators</h4>
+        <p>
+          Method 1 surcharge context and GSIB systemic-intensity overlays. Snapshot
+          files parsed via Playwright; surcharge scores from the OFR Basel workbook.
+        </p>
+        <div class="source-meta">
+          <span>Annual</span>
+          <span>Automated</span>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-id">NY Fed Primary Dealers</div>
+        <h4>Market Context</h4>
+        <p>
+          Weekly aggregate data on dealer Treasury positions, transactions, repo,
+          reverse repo, and securities lending. Collapsed to quarterly market-context
+          overlay via the official Markets Data API.
+        </p>
+        <div class="source-meta">
+          <span>Weekly</span>
+          <span>Automated</span>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-id">FINRA TRACE</div>
+        <h4>Treasury Trading Context</h4>
+        <p>
+          Free public aggregate data on Treasury par volume and trade counts.
+          Weekly archive files for 2019&ndash;2022; monthly workbooks for 2023+. Treated
+          as market-level context only.
+        </p>
+        <div class="source-meta">
+          <span>Weekly / Monthly</span>
+          <span>Semi-automated</span>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-id">OFR BSRM</div>
+        <h4>Enrichment</h4>
+        <p>
+          Bank Systemic Risk Monitor scores used to build the annual Basel-method
+          surcharge overlay. Provides ranking context and systemic-intensity data
+          for GSIB identification.
+        </p>
+        <div class="source-meta">
+          <span>Mixed</span>
+          <span>Automated</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection reveal">
+      <h3>Pipeline Overview</h3>
+      <div class="method-flow">
+        <div class="method-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Ingest</h4>
+            <p>
+              Automated downloaders fetch Call Report bulk ZIPs, FR Y-9C files,
+              FR Y-15 snapshots, NY Fed API data, and TRACE aggregates into
+              standardized raw storage.
+            </p>
+          </div>
+        </div>
+        <div class="method-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Stage</h4>
+            <p>
+              Raw files are extracted, merged by schedule, and normalized into
+              Parquet with variable lineage and quality checks.
+            </p>
+          </div>
+        </div>
+        <div class="method-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Derive</h4>
+            <p>
+              A curated crosswalk links entities across sources. Insured-bank
+              and parent panels are assembled with rule-aware SLR headroom,
+              Treasury-capacity metrics, and market overlays.
+            </p>
+          </div>
+        </div>
+        <div class="method-step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Analyze</h4>
+            <p>
+              The event-study workflow runs DiD estimates, event-time coefficients,
+              and extension reports. All outputs are written to reproducible report
+              directories.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- REPORTS                                                            -->
+<!-- ================================================================== -->
+<section class="section" id="reports">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Output</p>
+      <h2>Reports</h2>
+      <p class="lead">
+        The repo generates structured report outputs covering the core event study,
+        five extension analyses, and market context.
+      </p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div class="report-card">
+        <div class="report-icon">&#9670;</div>
+        <div class="report-body">
+          <h4>Findings Memo</h4>
+          <p>
+            Integrated summary of all results, caveats, and recommended framing
+            for the v1 release.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#9632;</div>
+        <div class="report-body">
+          <h4>2020 Event Study</h4>
+          <p>
+            Core DiD estimates and event-time coefficients for the temporary exclusion
+            window. Includes broad, flagship, and flagship-clustered variants.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#9650;</div>
+        <div class="report-body">
+          <h4>Balance-Sheet Reallocation</h4>
+          <p>
+            Treated-versus-control change decomposition across Treasury, Fed balances,
+            deposits, and loans.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#9679;</div>
+        <div class="report-body">
+          <h4>Safe-Asset Absorption</h4>
+          <p>
+            Composition analysis separating Treasuries from Fed reserve balances
+            within the safe-asset portfolio.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#10038;</div>
+        <div class="report-body">
+          <h4>Parent&ndash;Bank Transmission</h4>
+          <p>
+            Linked-family analysis comparing bank-subsidiary and parent-company
+            balance-sheet changes within the same corporate family.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#8644;</div>
+        <div class="report-body">
+          <h4>Treasury Intermediation</h4>
+          <p>
+            Sensitivity analysis linking trading-assets and Treasury-inventory
+            responses to dealer-position and repo market context.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#9733;</div>
+        <div class="report-body">
+          <h4>Policy Regime Panel</h4>
+          <p>
+            Broader quarterly panel with regime averages across pre-exclusion,
+            temporary exclusion, post-exclusion normalization, and QT era.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#9783;</div>
+        <div class="report-body">
+          <h4>Market Context</h4>
+          <p>
+            NY Fed dealer statistics and TRACE aggregate data providing
+            Treasury-market backdrop for the bank-level analysis.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<!-- FOOTER                                                             -->
+<!-- ================================================================== -->
+<footer class="footer">
+  <div class="container">
+    <p>
+      SLR Watch &middot; by Shane Wray &middot; Built with free public data &middot;
+      <a href="https://github.com/smkwray/slrwatch">View on GitHub</a>
+    </p>
+    <p style="margin-top:8px;font-size:0.78rem">
+      This site presents research findings for informational purposes. Results
+      should be interpreted as directional evidence, not investment advice or
+      settled causal claims.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

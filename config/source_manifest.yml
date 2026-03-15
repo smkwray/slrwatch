@@ -1,0 +1,94 @@
+sources:
+  - id: fry9c_nic
+    title: FR Y-9C Financial Data Download (NIC)
+    owner: FFIEC / National Information Center
+    cadence: quarterly
+    retrieval_status: browser_automation_ready
+    landing_page: "https://www.ffiec.gov/npw/FinancialReport/FinancialDataDownload"
+    notes: >
+      Current and revised files are retrieved through a Playwright-backed browser
+      flow because raw HTTP requests are blocked by the NIC page challenge. A
+      manual ZIP-path fallback is also supported.
+
+  - id: fry9c_historical_chicagofed
+    title: Historical FR Y-9C archive
+    owner: Federal Reserve Bank of Chicago
+    cadence: quarterly
+    retrieval_status: working
+    landing_page: "https://www.chicagofed.org/banking/financial-institution-reports/bhc-data"
+    url_template: "https://www.chicagofed.org/~/media/others/banking/financial-institution-reports/bhc-data/bhcf{yy}{mm}.csv"
+    notes: >
+      Direct helper currently supports 1986Q3 through 2021Q1.
+
+  - id: call_reports_pdd
+    title: FFIEC Call Report bulk data
+    owner: FFIEC Central Data Repository
+    cadence: quarterly
+    retrieval_status: working
+    landing_page: "https://cdr.ffiec.gov/public/pws/downloadbulkdata.aspx"
+    notes: >
+      The repo can submit the public bulk-download form, save the ZIP under
+      data/raw, extract the schedules, merge them, and stage normalized Parquet
+      output with variable lineage.
+
+  - id: fry15_snapshots
+    title: FR Y-15 Snapshot Reports
+    owner: FFIEC / National Information Center
+    cadence: annual posting of December snapshots
+    retrieval_status: working
+    landing_page: "https://www.ffiec.gov/npw/FinancialReport/FRY15Reports"
+    notes: >
+      The repo uses Playwright to render the snapshot page and pull direct CSV
+      links for All Line Items and G-SIB Indicators.
+
+  - id: ofr_bsrm
+    title: OFR Bank Systemic Risk Monitor
+    owner: Office of Financial Research
+    cadence: mixed / refreshed by series
+    retrieval_status: working
+    landing_page: "https://www.financialresearch.gov/bank-systemic-risk-monitor/"
+    notes: >
+      Used to build the annual Basel-method surcharge overlay that maps into the
+      FR Y-15 reporter crosswalk.
+
+  - id: nyfed_primary_dealers
+    title: New York Fed Primary Dealer Statistics
+    owner: Federal Reserve Bank of New York
+    cadence: weekly
+    retrieval_status: working
+    landing_page: "https://www.newyorkfed.org/markets/counterparties/primary-dealers-statistics"
+    notes: >
+      Repo can query the official Markets Data API and build a quarterly
+      market-context overlay for Treasury positions, transactions, repo, reverse
+      repo, securities borrowed, and securities lent.
+
+  - id: finra_trace_treasury
+    title: FINRA TRACE Treasury dissemination
+    owner: FINRA
+    cadence: end-of-day dissemination for covered on-the-run nominal coupons
+    retrieval_status: manual_builder_ready
+    landing_page: "https://www.finra.org/rules-guidance/rulebooks/finra-rules/6750"
+    notes: >
+      Treat as market context only. Repo can normalize free public weekly
+      aggregate ZIPs for 2019-2022 and public monthly aggregate workbooks for
+      2023+ into a quarterly overlay. Weekly archive files carry par-value
+      aggregates but not trade counts, so trade-count coverage begins in 2023.
+
+  - id: ffiec_002
+    title: FFIEC 002 for U.S. branches and agencies of foreign banks
+    owner: FFIEC
+    cadence: quarterly
+    retrieval_status: planned
+    landing_page: "https://www.ffiec.gov/resources/reporting-forms/ffiec002"
+    notes: >
+      Best used as a later parallel monitor rather than forcing it into the same
+      exact SLR-headroom pipeline used for insured banks and BHCs.
+
+  - id: fr_y7q
+    title: FR Y-7Q Capital and Asset Report for Foreign Banking Organizations
+    owner: Federal Reserve
+    cadence: quarterly or annual depending on FBO status
+    retrieval_status: planned
+    landing_page: "https://www.federalreserve.gov/apps/reportingforms/Report/Index/FR_Y-7Q"
+    notes: >
+      Use for foreign-parent capital context, not as a first-pass dependency.

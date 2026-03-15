@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "treatment": "Low Headroom",
+      "treasury_share_net": 0.0911,
+      "fed_balance_net": 0.0026,
+      "treasury_inventory_net": 0.0247
+    },
+    {
+      "treatment": "Covered Bank",
+      "treasury_share_net": 0.0986,
+      "fed_balance_net": -0.0045,
+      "treasury_inventory_net": 0.0197
+    }
+  ]
+}

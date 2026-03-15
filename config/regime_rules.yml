@@ -1,0 +1,30 @@
+regimes:
+  pre_2026_eslr:
+    effective_start: "2014-01-01"
+    effective_end: "2025-12-31"
+    base_slr_minimum: 0.03
+    gsib_parent_buffer: 0.02
+    covered_bank_sub_total_requirement: 0.06
+    notes: >
+      Legacy enhanced supplementary leverage ratio framework:
+      GSIB parents effectively faced 3% + 2%; covered-bank subsidiaries
+      faced a 6% threshold to be well capitalized.
+
+  early_adoption_window:
+    effective_start: "2026-01-01"
+    effective_end: "2026-03-31"
+    notes: >
+      Banking organizations may elect to adopt the modified standards before
+      the April 1, 2026 effective date.
+
+  post_2026_eslr:
+    effective_start: "2026-04-01"
+    effective_end: null
+    base_slr_minimum: 0.03
+    gsib_parent_buffer_formula: "0.5 * method_1_surcharge"
+    covered_bank_sub_buffer_formula: "min(0.01, 0.5 * parent_method_1_surcharge)"
+    covered_bank_sub_fallback_buffer_no_method1: 0.01
+    notes: >
+      Final rule calibration: GSIB parent buffer equals 50% of method 1
+      surcharge; covered-bank subsidiary buffer equals the lesser of 1%
+      or 50% of the parent method 1 surcharge.
