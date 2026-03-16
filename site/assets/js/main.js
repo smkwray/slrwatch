@@ -51,6 +51,20 @@ const DATA = {
     fed_balance_share: [0.0775, 0.1509, null, null],
     trading_share: [null, 0.0966, null, 0.0903]
   },
+  constraintDecomposition: {
+    regimes: [
+      {
+        regime: "Duration Loss Window (2022\u201323)",
+        insured: { leverage: 0.163, duration_loss: 0.659, funding: 0.178 },
+        parent:  { leverage: 0.205, duration_loss: 0.630, funding: 0.165 }
+      },
+      {
+        regime: "Late QT Normalization (2024\u201325)",
+        insured: { leverage: 0.342, duration_loss: 0.421, funding: 0.237 },
+        parent:  { leverage: 0.354, duration_loss: 0.342, funding: 0.304 }
+      }
+    ]
+  },
   parentTransmission: {
     co_movement: { ust: 75, trading: 60 },
     surcharge: {
@@ -681,6 +695,118 @@ function renderSurchargeChart() {
 }
 
 
+/* ---- Chart: Constraint Decomposition (Stacked Bar) ------------------ */
+function renderConstraintChart() {
+  const container = clearChart('chart-constraints');
+  if (!container) return;
+
+  const data = DATA.constraintDecomposition.regimes;
+  const rows = [];
+  data.forEach(d => {
+    rows.push({ label: 'Insured Banks', regime: d.regime, ...d.insured });
+    rows.push({ label: 'Parents / IHCs', regime: d.regime, ...d.parent });
+  });
+
+  const W = 700, H = 280;
+  const margin = { top: 30, right: 30, bottom: 40, left: 170 };
+  const plotW = W - margin.left - margin.right;
+  const plotH = H - margin.top - margin.bottom;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart-svg' });
+
+  const groupGap = 18;
+  const barH = 26;
+  const pairH = barH * 2 + 6;
+  const totalH = pairH * data.length + groupGap * (data.length - 1);
+  const startY = margin.top + (plotH - totalH) / 2;
+
+  const xScale = v => margin.left + v * plotW;
+
+  // grid
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(v => {
+    const x = xScale(v);
+    svg.appendChild(svgEl('line', {
+      x1: x, y1: margin.top, x2: x, y2: H - margin.bottom,
+      stroke: getCSS('--chart-grid'), 'stroke-width': 0.5
+    }));
+    const t = svgEl('text', {
+      x: x, y: H - margin.bottom + 18, 'text-anchor': 'middle',
+      fill: getCSS('--chart-label'), 'font-size': '10',
+      'font-family': "'JetBrains Mono', monospace"
+    });
+    t.textContent = (v * 100).toFixed(0) + '%';
+    svg.appendChild(t);
+  });
+
+  const colors = {
+    leverage: getCSS('--chart-1'),
+    duration_loss: getCSS('--chart-3'),
+    funding: getCSS('--chart-2')
+  };
+
+  rows.forEach((row, i) => {
+    const groupIdx = Math.floor(i / 2);
+    const withinIdx = i % 2;
+    const groupY = startY + groupIdx * (pairH + groupGap);
+    const y = groupY + withinIdx * (barH + 6);
+
+    // regime heading above first bar in each group
+    if (withinIdx === 0) {
+      const heading = svgEl('text', {
+        x: margin.left - 10, y: groupY - 8, 'text-anchor': 'end',
+        fill: getCSS('--text-tertiary'), 'font-size': '10', 'font-weight': '600',
+        'font-family': "'Inter', sans-serif", 'text-transform': 'uppercase',
+        'letter-spacing': '0.04em'
+      });
+      heading.textContent = row.regime;
+      svg.appendChild(heading);
+    }
+
+    // row label
+    const lbl = svgEl('text', {
+      x: margin.left - 10, y: y + barH / 2 + 4, 'text-anchor': 'end',
+      fill: getCSS('--text-primary'), 'font-size': '12', 'font-weight': '500',
+      'font-family': "'Inter', sans-serif"
+    });
+    lbl.textContent = row.label;
+    svg.appendChild(lbl);
+
+    // stacked segments
+    let xOff = 0;
+    ['leverage', 'duration_loss', 'funding'].forEach(key => {
+      const val = row[key];
+      const segW = val * plotW;
+
+      // bar segment
+      const isFirst = key === 'leverage';
+      const isLast = key === 'funding';
+      const rect = svgEl('rect', {
+        x: xScale(xOff), y: y, width: segW, height: barH,
+        fill: colors[key], opacity: '0.85',
+        rx: isFirst && isLast ? 4 : isFirst ? '4' : isLast ? '4' : '0'
+      });
+      svg.appendChild(rect);
+
+      // percentage label inside segment (if wide enough)
+      if (segW > 38) {
+        const pctLbl = svgEl('text', {
+          x: xScale(xOff) + segW / 2, y: y + barH / 2 + 4,
+          'text-anchor': 'middle', fill: '#FFFFFF',
+          'font-size': '11', 'font-weight': '700',
+          'font-family': "'JetBrains Mono', monospace"
+        });
+        pctLbl.textContent = (val * 100).toFixed(1) + '%';
+        svg.appendChild(pctLbl);
+      }
+
+      xOff += val;
+    });
+  });
+
+  container.appendChild(svg);
+}
+
+
 /* ---- Render All Charts ---------------------------------------------- */
 function renderAllCharts() {
   renderDotPlot();
@@ -689,6 +815,7 @@ function renderAllCharts() {
   renderRegimeChart();
   renderTransmissionChart();
   renderSurchargeChart();
+  renderConstraintChart();
 }
 
 

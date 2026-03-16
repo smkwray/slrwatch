@@ -2,38 +2,49 @@
 
 **[smkwray.github.io/slrwatch](https://smkwray.github.io/slrwatch/)**
 
-A public-data monitor of large-bank Supplementary Leverage Ratio (SLR) pressure, Treasury holdings, and balance-sheet behavior. The core question: when leverage-ratio constraints tighten or loosen, do large banks adjust their Treasury portfolios—and does that matter for Treasury-market capacity?
+A public-data research project studying how Supplementary Leverage Ratio pressure shapes large-bank Treasury holdings and balance-sheet behavior. The pipeline is built entirely from free regulatory filings and market data, covering FFIEC Call Reports, FR Y-9C, FR Y-15, NY Fed dealer statistics, and FINRA TRACE.
 
-## What this project does
+## Why this matters
 
-SLR Watch builds a reproducible quarterly panel from free public regulatory data and runs a causal design around the April 2020 temporary SLR exclusion. The pipeline covers:
+The Supplementary Leverage Ratio requires large banks to hold Tier 1 capital against all on-balance-sheet assets without risk-weighting. Because SLR treats Treasuries the same as corporate loans in the denominator, leverage-constrained banks face a real cost to holding Treasuries. That link matters for Treasury-market intermediation, monetary-policy transmission, and capital-rule design.
 
-- **Rule-aware SLR engine** with pre-2026 and post-2026 calibration, GSIB parent and covered-bank subsidiary logic, and early-adoption handling.
-- **Automated ingestion** for FFIEC Call Reports, FR Y-9C (historical and current), FR Y-15 snapshots, NY Fed primary dealer statistics, and FINRA TRACE Treasury aggregates.
-- **Panel construction** for insured-bank subsidiaries, parent holding companies, and U.S. IHCs of foreign banking organizations.
-- **Event-study workflow** producing DiD estimates, event-time coefficients, and five extension reports.
+When the Fed temporarily excluded Treasuries and reserves from SLR in April 2020, it created a natural experiment for measuring how leverage-ratio relief affects bank Treasury demand. SLR Watch uses that event as its causal core and extends the question with a broader constraint-regime analysis.
 
-## Why this question matters
+## Core finding: the 2020 SLR exclusion
 
-The Supplementary Leverage Ratio is the binding capital constraint for many of the largest U.S. banks. Because SLR treats Treasury securities identically to riskier assets in the denominator, leverage-constrained banks face a real cost to holding Treasuries. When the Fed temporarily excluded Treasuries and reserves from SLR in April 2020, it created a natural experiment for measuring how leverage pressure shapes safe-asset demand. Understanding this link matters for Treasury-market intermediation, monetary-policy transmission, and the design of future capital rules.
+Banks that appear more balance-sheet constrained increased Treasury holdings more after the temporary exclusion than comparison banks did.
 
-## Current findings
+**Broad sample (21 entities, 232 bank-quarter observations):**
+- Low-headroom banks: +2.47pp Treasury inventory increase relative to controls (p = 0.002)
+- Covered-bank subsidiaries: +1.97pp (p = 0.005)
 
-The central finding is that banks that appear more balance-sheet constrained—especially covered-bank subsidiaries subject to the 6% well-capitalized threshold—increased Treasury holdings more after the 2020 temporary SLR exclusion than comparison banks.
+**Flagship clustered inference (15 parent clusters):**
+- Low headroom: +1.78pp (p = 0.176)
+- Covered bank: +2.06pp (p = 0.163)
 
-**Core event-study result:**
-- Low-headroom banks: +2.47pp Treasury inventory increase relative to controls (broad sample, p = 0.002)
-- Covered-bank subsidiaries: +1.97pp (broad sample, p = 0.005)
-- Under parent-level clustering in the flagship 15-entity sample, coefficients retain sign and magnitude but lose conventional significance (p ≈ 0.17)
+Under parent-level clustering in the flagship sample, coefficients retain sign and magnitude but lose conventional significance. These results should be described as directional evidence rather than a settled causal estimate.
 
-**Mechanism evidence from extension reports:**
-- Constrained banks reallocated away from deposits and loans, not a general balance-sheet boom
-- The safe-asset mix shifted toward Treasuries rather than Fed reserve balances (+9.9pp for covered banks)
-- Bank and parent Treasury changes co-moved in 75% of linked family comparisons
-- Trading-assets share declined for constrained banks as Treasury holdings rose
-- The 2020 window sits within a broader story of safe-asset absorption and policy-regime shifts
+## Mechanism evidence
 
-**Caveats:** Under the strictest clustered inference (15 parent clusters), these results should be described as directional evidence rather than a settled causal estimate.
+Five extension reports support the core result with a consistent mechanism story:
+
+- **Reallocation, not expansion.** Constrained banks shifted balance-sheet capacity toward Treasuries while reducing deposits and loans. Low-headroom banks: Treasury +2.47pp, deposit growth -3.52pp, loan growth -1.65pp.
+- **Safe-asset composition shift.** The response was within safe assets, not just between safe and risky. Covered banks shifted their safe-asset mix toward Treasuries by +9.86pp relative to controls.
+- **Family-level transmission.** Bank and parent Treasury-share changes moved in the same direction in 75% of linked quarter-over-quarter comparisons across 15 parent families.
+- **Trading-balance-sheet tradeoff.** Constrained banks reduced trading-asset share while Treasury holdings rose, consistent with leverage-capacity reallocation.
+- **Policy-regime context.** A longer quarterly panel (2019-2026) places the 2020 event within a broader safe-asset absorption story across pre-exclusion, exclusion, post-exclusion, and QT-era regimes.
+
+## Constraint decomposition
+
+A live decomposition module extends the project from "did SLR relief matter in 2020?" to "which balance-sheet constraint matters in which regime?" It compares leverage headroom, duration-loss pressure, and funding stress across insured-bank and parent/IHC panels through 2025Q4, using a scorecard built from SLR headroom, Treasury unrealized-loss proxies, deposit runoff, repo reliance, deposit funding gaps, liquid buffers, and HTM mix.
+
+Key results:
+
+- In the 2022-2023 duration-loss window, duration loss is the dominant bucket for insured banks in 65.9% of observations and for parents/IHCs in 63.0%.
+- By late QT normalization, insured banks still lean duration loss at 42.1%, while parents/IHCs now lean back toward leverage at 35.4%.
+- Linked parent-bank families match on the dominant constraint in 64.8% of family-quarters during the duration-loss window; both bank and parent are duration-loss dominant in 48.6% of those observations.
+
+A first interaction-regression layer provides supporting evidence on the parent panel: higher duration pressure is associated with higher Treasury share in the 2022-2023 window (coefficient 0.027, p = 0.001) and lower Treasury share during late QT normalization (-0.034, p = 0.026). Bank-side interaction results are weaker. This layer supports the descriptive decomposition rather than constituting a separate causal claim.
 
 ## Public data sources
 
@@ -53,12 +64,11 @@ config/          Rule regime definitions, variable registry, source manifest
 src/slr_watch/   Python package: rules, headroom, ingestion, panels, analytics
 data/            Raw, staged, and derived data (generated by pipeline)
 output/reports/  Event-study results and extension reports
-docs/            Data source documentation
 tests/           Unit and integration tests
 site/            Static GitHub Pages site
 ```
 
-## Reproducing the main outputs
+## Reproducing the outputs
 
 ```bash
 # Install
@@ -71,6 +81,8 @@ python -m pytest -q
 # Download and stage data (example quarters)
 python -m slr_watch.cli download-call-reports --quarter 2020Q1
 python -m slr_watch.cli stage-call-reports --quarter 2020Q1
+python -m slr_watch.cli download-fry9c --quarter 2025Q4
+python -m slr_watch.cli stage-fry9c --quarter 2025Q4 --input data/raw/fry9c/2025Q4/BHCF20251231.ZIP
 
 # Build panels
 python -m slr_watch.cli build-crosswalk
@@ -84,21 +96,20 @@ python -m slr_watch.cli run-safe-asset-absorption-report
 python -m slr_watch.cli run-parent-transmission-report
 python -m slr_watch.cli run-treasury-intermediation-report
 python -m slr_watch.cli run-policy-regime-panel-report
+python -m slr_watch.cli run-constraint-decomposition-report
 ```
 
 See `python -m slr_watch.cli --help` for the full command set.
+
+For current FR Y-9C quarters, the NIC downloader first tries browser automation. If FFIEC blocks that flow, it automatically checks for the expected ZIP in the raw quarter folder, the current working directory, and `~/Downloads` before failing, so the practical fallback is to download the ZIP manually and rerun the same command.
 
 ## Project site
 
 A static research microsite with interactive charts and detailed findings is available at **[smkwray.github.io/slrwatch](https://smkwray.github.io/slrwatch/)** (deployed from [`site/`](site/)).
 
-To preview locally:
-
 ```bash
 cd site && python -m http.server 8000
 ```
-
-Then open [http://localhost:8000](http://localhost:8000).
 
 ## License
 

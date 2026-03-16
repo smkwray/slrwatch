@@ -50,6 +50,7 @@ def _load_stage_frames(path: Path, suffix: str = ".parquet") -> pd.DataFrame:
 
 def _add_treasury_metrics(frame: pd.DataFrame) -> pd.DataFrame:
     out = frame.copy()
+
     def series_or_zero(column: str) -> pd.Series:
         if column in out.columns:
             return pd.to_numeric(out[column], errors="coerce").fillna(0)
@@ -64,9 +65,68 @@ def _add_treasury_metrics(frame: pd.DataFrame) -> pd.DataFrame:
     total_assets = total_assets_raw.where(total_assets_raw != 0)
     out["ust_share_assets"] = out["ust_inventory_fv"] / total_assets
     out["balances_due_from_fed_share_assets"] = series_or_zero("balances_due_from_fed") / total_assets
+    out["repos_share_assets"] = series_or_zero("repos") / total_assets
     out["reverse_repos_share_assets"] = series_or_zero("reverse_repos") / total_assets
     out["trading_assets_total_share_assets"] = series_or_zero("trading_assets_total") / total_assets
     out["ust_share_headroom"] = out["ust_inventory_fv"] / series_or_zero("headroom_dollars").replace({0: pd.NA})
+    return out
+
+
+def _add_constraint_metrics(frame: pd.DataFrame) -> pd.DataFrame:
+    out = frame.copy()
+
+    def series_or_zero(column: str) -> pd.Series:
+        if column in out.columns:
+            return pd.to_numeric(out[column], errors="coerce").fillna(0)
+        return pd.Series(0, index=out.index, dtype="Float64")
+
+    total_assets_raw = series_or_zero("total_assets")
+    total_assets = total_assets_raw.where(total_assets_raw != 0)
+    tier1_capital_raw = series_or_zero("tier1_capital")
+    tier1_capital = tier1_capital_raw.where(tier1_capital_raw != 0)
+    ust_inventory = pd.to_numeric(out.get("ust_inventory_fv"), errors="coerce")
+
+    htm_amortized = series_or_zero("ust_htm_amortized")
+    htm_fair_value = series_or_zero("ust_htm_fair_value")
+    afs_amortized = series_or_zero("ust_afs_amortized")
+    afs_fair_value = series_or_zero("ust_afs_fair_value")
+    balances_due_from_fed = series_or_zero("balances_due_from_fed")
+    reverse_repos = series_or_zero("reverse_repos")
+    deposits = series_or_zero("deposits")
+    loans = series_or_zero("loans")
+
+    out["htm_unrealized_loss"] = (htm_amortized - htm_fair_value).clip(lower=0)
+    out["afs_unrealized_loss"] = (afs_amortized - afs_fair_value).clip(lower=0)
+    out["total_unrealized_loss"] = out["htm_unrealized_loss"] + out["afs_unrealized_loss"]
+    out["total_unrealized_loss_share_assets"] = out["total_unrealized_loss"] / total_assets
+    out["total_unrealized_loss_tier1"] = out["total_unrealized_loss"] / tier1_capital
+    out["liquid_asset_share_assets"] = (balances_due_from_fed + reverse_repos) / total_assets
+    out["deposit_share_assets"] = deposits / total_assets
+    out["loan_share_assets"] = loans / total_assets
+    out["loan_to_deposit_ratio"] = loans / deposits.replace({0: pd.NA})
+    out["deposit_funding_gap_share_assets"] = (loans - deposits).clip(lower=0) / total_assets
+    out["non_deposit_funding_share_assets"] = (total_assets_raw - deposits - tier1_capital_raw).clip(lower=0) / total_assets
+    out["safe_asset_buffer_share_assets"] = (ust_inventory.fillna(0) + balances_due_from_fed + reverse_repos) / total_assets
+    out["liquid_asset_to_deposits"] = (balances_due_from_fed + reverse_repos) / deposits.replace({0: pd.NA})
+    out["safe_asset_buffer_to_deposits"] = (ust_inventory.fillna(0) + balances_due_from_fed + reverse_repos) / deposits.replace({0: pd.NA})
+    out["htm_share_ust"] = htm_fair_value / ust_inventory.replace({0: pd.NA})
+    out["afs_share_ust"] = afs_fair_value / ust_inventory.replace({0: pd.NA})
+    return out
+
+
+def _add_panel_dynamics(frame: pd.DataFrame) -> pd.DataFrame:
+    out = frame.copy()
+    if out.empty or "quarter_end" not in out.columns or "entity_id" not in out.columns:
+        return out
+    out["quarter_end"] = pd.to_datetime(out["quarter_end"])
+    out = out.sort_values(["entity_id", "quarter_end"]).reset_index(drop=True)
+
+    if "deposits" in out.columns:
+        out["deposit_growth_qoq"] = out.groupby("entity_id")["deposits"].pct_change()
+    if "loans" in out.columns:
+        out["loan_growth_qoq"] = out.groupby("entity_id")["loans"].pct_change()
+    if "ust_share_assets" in out.columns:
+        out["ust_share_assets_qoq"] = out.groupby("entity_id")["ust_share_assets"].diff()
     return out
 
 
@@ -111,6 +171,8 @@ def build_insured_bank_panel(
     prepared = _prepare_panel(staged, crosswalk, entity_type="insured_bank_sub")
     enriched = enrich_with_headroom(prepared)
     enriched = _add_treasury_metrics(enriched)
+    enriched = _add_constraint_metrics(enriched)
+    enriched = _add_panel_dynamics(enriched)
     destination = output_path or derived_data_path("insured_bank_panel.parquet")
     return write_frame(enriched, destination)
 
@@ -194,5 +256,7 @@ def build_parent_panel(
     prepared = _merge_fry15_overlay(prepared, fry15_path)
     enriched = enrich_with_headroom(prepared)
     enriched = _add_treasury_metrics(enriched)
+    enriched = _add_constraint_metrics(enriched)
+    enriched = _add_panel_dynamics(enriched)
     destination = output_path or derived_data_path("parent_panel.parquet")
     return write_frame(enriched, destination)

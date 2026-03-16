@@ -142,6 +142,7 @@ def _exclude_schedule(path: Path) -> bool:
     return (
         name == "readme.txt"
         or name.startswith("ffiec cdr call bulk por")
+        or "schedule narr" in name
         or not path.is_file()
         or path.suffix.lower() != ".txt"
     )

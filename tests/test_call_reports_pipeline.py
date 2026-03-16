@@ -58,3 +58,27 @@ def test_stage_call_report_zip(tmp_path: Path):
     assert frame.loc[0, "total_leverage_exposure"] == 1000
     assert frame.loc[0, "deposits"] == 1500
     assert frame.loc[0, "loans"] == 800
+
+
+def test_stage_call_report_zip_skips_narrative_schedule(tmp_path: Path):
+    zip_path = tmp_path / "FFIEC-CDR-Call-Bulk-All-Schedules-12312022.zip"
+    numeric_schedule = (
+        "metadata row\n"
+        "RSSD9001\tRCFA8274\tRCFAH015\tRCFD2170\n"
+        "1111\t55\t1000\t2000\n"
+    )
+    narrative_schedule = (
+        "\"IDRSSD\"\tRCON6979\tTEXT6980\t\n"
+        "\tNO COMMENT-BK MANAGEMENT STATEMENT\tBANK MANAGEMENT STATEMENT\t\n"
+        "1111\ttrue\tEdit Name:\tEdit Type:\tLong Message:\n"
+    )
+    with ZipFile(zip_path, "w") as archive:
+        archive.writestr("ffiec_cdr_call_bulk_all_schedules_12312022/RCON_schedule.txt", numeric_schedule)
+        archive.writestr("ffiec_cdr_call_bulk_all_schedules_12312022/FFIEC CDR Call Schedule NARR 12312022.txt", narrative_schedule)
+
+    _, normalized_path = stage_call_report_zip(zip_path, output_dir=tmp_path / "staged")
+    frame = pd.read_parquet(normalized_path)
+
+    assert frame.loc[0, "rssd_id"] == "1111"
+    assert frame.loc[0, "tier1_capital"] == 55
+    assert frame.loc[0, "total_leverage_exposure"] == 1000

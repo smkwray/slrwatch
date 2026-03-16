@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from .analytics.headroom_panel import enrich_with_headroom
+from .analytics.constraint_decomposition import run_constraint_decomposition_report
 from .analytics.market_context import run_market_context_report
 from .analytics.parent_transmission import run_parent_transmission_report
 from .analytics.policy_regime_panel import run_policy_regime_panel_report
@@ -250,6 +251,16 @@ def cmd_run_policy_regime_panel_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_run_constraint_decomposition_report(args: argparse.Namespace) -> int:
+    path = run_constraint_decomposition_report(
+        bank_panel_path=Path(args.bank_panel) if args.bank_panel else None,
+        parent_panel_path=Path(args.parent_panel) if args.parent_panel else None,
+        output_dir=Path(args.output_dir) if args.output_dir else None,
+    )
+    print(f"Wrote outputs under {path}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="slr-watch")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -377,6 +388,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--market-panel", default=str(derived_data_path("market_overlay_panel.parquet")))
     p.add_argument("--output-dir", default=str(reports_path("policy_regime_panel")))
     p.set_defaults(func=cmd_run_policy_regime_panel_report)
+
+    p = sub.add_parser("run-constraint-decomposition-report", help="Build the first bank-constraint decomposition report")
+    p.add_argument("--bank-panel", default=str(derived_data_path("insured_bank_panel.parquet")))
+    p.add_argument("--parent-panel", default=str(derived_data_path("parent_panel.parquet")))
+    p.add_argument("--output-dir", default=str(reports_path("constraint_decomposition")))
+    p.set_defaults(func=cmd_run_constraint_decomposition_report)
     return parser
 
 

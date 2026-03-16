@@ -21,6 +21,10 @@ dist/
 build/
 coverage/
 *.parquet
+*.zip
+*.ZIP
+*.sqlite
+*.db
 .venv/
 venv/
 node_modules/

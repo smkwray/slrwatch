@@ -24,6 +24,7 @@
       <li><a href="#method">Method</a></li>
       <li><a href="#mechanism">Mechanism</a></li>
       <li><a href="#context">Context</a></li>
+      <li><a href="#next">Constraints</a></li>
       <li><a href="#data">Data</a></li>
       <li><a href="#reports">Reports</a></li>
     </ul>
@@ -344,7 +345,7 @@
       <p class="label">Mechanism Evidence</p>
       <h2>How Constrained Banks Responded</h2>
       <p class="lead">
-        Five extension reports build a mechanism story: reallocation away from
+        Five current extension reports build a mechanism story: reallocation away from
         other balance-sheet uses, a shift in safe-asset composition toward
         Treasuries, consistency with family-level transmission, and a possible
         reduction in trading-balance-sheet use.
@@ -539,6 +540,114 @@
 </section>
 
 <!-- ================================================================== -->
+<!-- CONSTRAINT DECOMPOSITION                                           -->
+<!-- ================================================================== -->
+<section class="section" id="next">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="label">Extension</p>
+      <h2>Which Constraint Matters in Which Regime?</h2>
+      <p class="lead">
+        The 2020 event study isolates the SLR channel. But leverage headroom is
+        not the only pressure that shapes bank Treasury capacity. This module
+        decomposes balance-sheet constraints into leverage, duration-loss, and
+        funding pressure across insured-bank and parent/IHC panels through 2025Q4.
+      </p>
+    </div>
+
+    <!-- Stacked Bar Chart -->
+    <div class="chart-wrapper reveal">
+      <div class="chart-title">Constraint Mix by Regime and Panel</div>
+      <div class="chart-subtitle">
+        Share of bank-quarters where each constraint scores highest &middot;
+        Scorecard combines SLR headroom, unrealized-loss proxies, deposit/funding metrics, and liquidity buffers
+      </div>
+      <div class="chart-container" id="chart-constraints"></div>
+      <div class="chart-legend">
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--chart-1)"></div>
+          Leverage
+        </div>
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--chart-3)"></div>
+          Duration Loss
+        </div>
+        <div class="chart-legend-item">
+          <div class="chart-legend-dot" style="background:var(--chart-2)"></div>
+          Funding
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-grid reveal" style="margin-top:32px;margin-bottom:32px">
+      <div class="stat-item">
+        <div class="stat-value">65.9%</div>
+        <div class="stat-label">Banks: duration-loss dominant in 2022&ndash;2023</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">63.0%</div>
+        <div class="stat-label">Parents: duration-loss dominant in 2022&ndash;2023</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">539</div>
+        <div class="stat-label">Insured-bank observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">393</div>
+        <div class="stat-label">Parent / IHC observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">64.8%</div>
+        <div class="stat-label">Linked families match in 2022&ndash;2023</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">48.6%</div>
+        <div class="stat-label">Both bank and parent duration-loss dominated</div>
+      </div>
+    </div>
+
+    <div class="grid-3 reveal">
+      <div class="card">
+        <h4>Regime shift</h4>
+        <p>
+          In the 2022&ndash;2023 duration-loss window, duration pressure becomes the
+          dominant constraint for both insured banks (65.9%) and parents/IHCs (63.0%).
+          By late QT normalization, insured banks still lean duration loss at 42.1%,
+          while parents shift back toward leverage at 35.4%.
+        </p>
+      </div>
+      <div class="card">
+        <h4>Family alignment</h4>
+        <p>
+          Linked families match on the dominant constraint in 64.8% of
+          duration-loss-window family-quarters, and both sides are
+          duration-loss dominated in 48.6% of those observations. The
+          2022&ndash;2023 regime is the first period where joint duration-loss
+          dominance becomes common.
+        </p>
+      </div>
+      <div class="card">
+        <h4>Supporting regressions</h4>
+        <p>
+          On the parent panel, higher duration pressure is associated with
+          higher Treasury share in the 2022&ndash;2023 window
+          (0.027, p&nbsp;=&nbsp;0.001) and lower Treasury share in late QT
+          (&minus;0.034, p&nbsp;=&nbsp;0.026). Bank-side results are weaker.
+          This is supporting evidence, not a separate causal claim.
+        </p>
+      </div>
+    </div>
+
+    <div class="caveat reveal" style="margin-top:32px">
+      <strong>Scope note.</strong> The decomposition extends the project's question
+      from &ldquo;did SLR relief matter in 2020?&rdquo; to &ldquo;which constraint
+      matters in which regime?&rdquo; Its results are descriptive and should be read
+      as a complement to the 2020 event study, not a standalone causal design.
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
 <!-- DATA SOURCES                                                       -->
 <!-- ================================================================== -->
 <section class="section" id="data">
@@ -693,7 +802,7 @@
       <h2>Reports</h2>
       <p class="lead">
         The repo generates structured report outputs covering the core event study,
-        five extension analyses, and market context.
+        five current extension analyses, market context, and a live constraint-decomposition module.
       </p>
     </div>
 
@@ -775,6 +884,17 @@
           <p>
             NY Fed dealer statistics and TRACE aggregate data providing
             Treasury-market backdrop for the bank-level analysis.
+          </p>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">&#10148;</div>
+        <div class="report-body">
+          <h4>Constraint Decomposition</h4>
+          <p>
+            Cross-regime comparison of leverage headroom, duration-loss pressure,
+            and funding stress for insured banks and parents through 2025Q4, with
+            family-alignment summaries and a supporting interaction-regression layer.
           </p>
         </div>
       </div>

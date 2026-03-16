@@ -27,7 +27,9 @@ def test_build_insured_bank_panel(tmp_path: Path):
                 "quarter_end": "2020-03-31",
                 "tier1_capital": 55.0,
                 "total_leverage_exposure": 1000.0,
+                "ust_htm_amortized": 12.0,
                 "ust_htm_fair_value": 10.0,
+                "ust_afs_amortized": 21.0,
                 "ust_afs_fair_value": 20.0,
                 "ust_trading_assets": 5.0,
                 "balances_due_from_fed": 300.0,
@@ -68,6 +70,16 @@ def test_build_insured_bank_panel(tmp_path: Path):
     assert frame.loc[0, "entity_id"] == "bank_1001"
     assert round(frame.loc[0, "headroom_pp"], 6) == -0.005
     assert frame.loc[0, "ust_inventory_fv"] == 35.0
+    assert frame.loc[0, "total_unrealized_loss"] == 3.0
+    assert round(frame.loc[0, "total_unrealized_loss_tier1"], 6) == round(3.0 / 55.0, 6)
+    assert round(frame.loc[0, "liquid_asset_share_assets"], 6) == 0.17
+    assert round(frame.loc[0, "repos_share_assets"], 6) == 0.0
+    assert round(frame.loc[0, "deposit_share_assets"], 6) == 0.75
+    assert round(frame.loc[0, "loan_to_deposit_ratio"], 6) == round(800.0 / 1500.0, 6)
+    assert round(frame.loc[0, "non_deposit_funding_share_assets"], 6) == round((2000.0 - 1500.0 - 55.0) / 2000.0, 6)
+    assert round(frame.loc[0, "safe_asset_buffer_share_assets"], 6) == round((35.0 + 300.0 + 40.0) / 2000.0, 6)
+    assert round(frame.loc[0, "liquid_asset_to_deposits"], 6) == round((300.0 + 40.0) / 1500.0, 6)
+    assert round(frame.loc[0, "safe_asset_buffer_to_deposits"], 6) == round((35.0 + 300.0 + 40.0) / 1500.0, 6)
 
 
 def test_build_parent_panel_with_fry15_overlay(tmp_path: Path):
@@ -78,7 +90,9 @@ def test_build_parent_panel_with_fry15_overlay(tmp_path: Path):
                 "quarter_end": "2026-06-30",
                 "tier1_capital": 120.0,
                 "total_leverage_exposure": 2400.0,
+                "ust_htm_amortized": 10.5,
                 "ust_htm_fair_value": 10.0,
+                "ust_afs_amortized": 16.0,
                 "ust_afs_fair_value": 15.0,
                 "ust_trading_assets": 5.0,
                 "total_assets": 3000.0,
@@ -135,6 +149,10 @@ def test_build_parent_panel_with_fry15_overlay(tmp_path: Path):
 
     assert frame.loc[0, "entity_id"] == "parent_2001"
     assert frame.loc[0, "required_slr"] == 0.0525
+    assert frame.loc[0, "total_unrealized_loss"] == 1.5
+    assert round(frame.loc[0, "loan_to_deposit_ratio"], 6) == round(900.0 / 1500.0, 6)
+    assert round(frame.loc[0, "repos_share_assets"], 6) == 0.0
+    assert round(frame.loc[0, "liquid_asset_to_deposits"], 6) == round((200.0 + 25.0) / 1500.0, 6)
 
 
 def test_build_parent_panel_with_fry15_overlay_carries_forward_latest_quarter(tmp_path: Path):

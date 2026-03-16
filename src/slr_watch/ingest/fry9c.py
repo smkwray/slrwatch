@@ -22,6 +22,8 @@ CHICAGO_FED_BASE = (
     "financial-institution-reports/bhc-data"
 )
 NIC_FINANCIAL_DOWNLOAD_PAGE = "https://www.ffiec.gov/npw/FinancialReport/FinancialDataDownload"
+
+
 def _is_historical_quarter(quarter: QuarterRef) -> bool:
     return (quarter.year, quarter.quarter) <= (2021, 1)
 
@@ -130,6 +132,32 @@ def copy_manual_fry9c_zip(zip_path: Path, *, quarter: QuarterRef, output_path: P
     return destination
 
 
+def _resolve_case_insensitive_match(directory: Path, filename: str) -> Path | None:
+    if not directory.exists() or not directory.is_dir():
+        return None
+    target = filename.upper()
+    for child in directory.iterdir():
+        if child.is_file() and child.name.upper() == target:
+            return child
+    return None
+
+
+def find_manual_fry9c_zip(quarter: QuarterRef, search_paths: list[Path] | None = None) -> Path | None:
+    filename = expected_nic_zip_filename(quarter)
+    candidates = search_paths or [
+        raw_data_path("fry9c", quarter.label),
+        Path.cwd(),
+        Path.home() / "Downloads",
+    ]
+    for candidate in candidates:
+        if candidate.is_file() and candidate.name.upper() == filename.upper():
+            return candidate
+        match = _resolve_case_insensitive_match(candidate, filename)
+        if match is not None:
+            return match
+    return None
+
+
 def download_fry9c(
     quarter: QuarterRef,
     *,
@@ -140,7 +168,17 @@ def download_fry9c(
         return copy_manual_fry9c_zip(zip_path, quarter=quarter, output_path=output_path)
     if _is_historical_quarter(quarter):
         return download_historical_fry9c(quarter, output_path=output_path)
-    return download_nic_fry9c(quarter, output_path=output_path)
+    try:
+        return download_nic_fry9c(quarter, output_path=output_path)
+    except RuntimeError as exc:
+        manual_zip = find_manual_fry9c_zip(quarter)
+        if manual_zip is not None:
+            return copy_manual_fry9c_zip(manual_zip, quarter=quarter, output_path=output_path)
+        expected = expected_nic_zip_filename(quarter)
+        raise RuntimeError(
+            f"{exc} Expected a manual fallback file named {expected} in "
+            f"{raw_data_path('fry9c', quarter.label)}, the current working directory, or ~/Downloads."
+        ) from exc
 
 
 def _read_fry9c_table(path: Path) -> pd.DataFrame:
@@ -226,5 +264,7 @@ def nic_current_download_notes() -> str:
         "Current and revised FR Y-9C files are published through the NIC Financial Data "
         "Download page. This repo uses Python Playwright-backed browser automation "
         "for NIC downloads and supports a --zip-path fallback for manually "
-        "downloaded files."
+        "downloaded files. If automation is blocked, the downloader also checks "
+        "for the expected BHCF ZIP in the raw quarter folder, the current working "
+        "directory, and ~/Downloads before failing."
     )
