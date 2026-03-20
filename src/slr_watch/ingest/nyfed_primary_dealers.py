@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
 import requests
+
+logger = logging.getLogger(__name__)
 
 from ..config import derived_data_path
 from ..pipeline import write_frame
@@ -103,7 +106,14 @@ def build_primary_dealer_overlay(
     output_path: Path | None = None,
     session: requests.Session | None = None,
 ) -> Path:
+    """Build quarterly market overlay from NY Fed primary dealer data.
+
+    When *end_date* is not provided, defaults to today's date, so outputs
+    may differ between runs.  Pass an explicit end_date for reproducibility.
+    """
     final_end_date = end_date or date.today().isoformat()
+    if end_date is None:
+        logger.info("No end_date specified; using today: %s", final_end_date)
     dictionary = fetch_primary_dealer_dictionary(session=session)
     weekly = fetch_primary_dealer_timeseries(
         start_date,

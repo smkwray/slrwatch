@@ -16,7 +16,13 @@ docs/
 data/raw/
 data/staging/
 data/derived/
-output/
+output/*
+!output/reports/
+output/reports/*
+!output/reports/constraint_decomposition/
+output/reports/constraint_decomposition/*
+!output/reports/constraint_decomposition/regime_summary.csv
+!output/reports/constraint_decomposition/family_alignment_summary.csv
 dist/
 build/
 coverage/

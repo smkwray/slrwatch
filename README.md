@@ -71,8 +71,14 @@ site/            Static GitHub Pages site
 ## Reproducing the outputs
 
 ```bash
-# Install
-pip install -e .
+# Install (core analysis — reproducible, pinned dependencies)
+pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
+
+# Or install with latest compatible versions
+pip install -e ".[dev]"
+
+# Optional: browser automation for FR Y-9C downloads
+pip install -e ".[browser]"
 python -m playwright install chromium
 
 # Run tests
@@ -89,7 +95,7 @@ python -m slr_watch.cli build-crosswalk
 python -m slr_watch.cli build-insured-panel
 python -m slr_watch.cli build-parent-panel
 
-# Run analysis
+# Run analysis (or `make reproduce` to run all steps below at once)
 python -m slr_watch.cli run-event-study
 python -m slr_watch.cli run-reallocation-report
 python -m slr_watch.cli run-safe-asset-absorption-report

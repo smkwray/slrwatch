@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-locked:
+    name: "Test (Python 3.11, locked deps)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.lock && pip install -e ".[dev]" --no-deps
+      - run: python -m pytest -q
+      - run: python -m slr_watch.cli print-sources
+
+  test-latest:
+    name: "Test (Python 3.12, latest deps)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest -q
+      - run: python -m slr_watch.cli print-sources

@@ -14,7 +14,6 @@ dependencies = [
   "matplotlib>=3.9",
   "openpyxl>=3.1",
   "pandas>=2.2",
-  "playwright>=1.58",
   "pyarrow>=16",
   "PyYAML>=6.0",
   "requests>=2.32",
@@ -23,6 +22,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+browser = ["playwright>=1.58"]
 
 [project.scripts]
 slr-watch = "slr_watch.cli:main"

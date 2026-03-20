@@ -1,4 +1,4 @@
-.PHONY: test demo sources plan crosswalk insured-panel parent-panel event-study
+.PHONY: test demo sources plan crosswalk insured-panel parent-panel event-study reproduce
 
 PYTHON ?= python
 
@@ -25,3 +25,15 @@ parent-panel:
 
 event-study:
 	$(PYTHON) -m slr_watch.cli run-event-study
+
+reproduce:
+	$(PYTHON) -m slr_watch.cli build-crosswalk
+	$(PYTHON) -m slr_watch.cli build-insured-panel
+	$(PYTHON) -m slr_watch.cli build-parent-panel
+	$(PYTHON) -m slr_watch.cli run-event-study
+	$(PYTHON) -m slr_watch.cli run-reallocation-report
+	$(PYTHON) -m slr_watch.cli run-safe-asset-absorption-report
+	$(PYTHON) -m slr_watch.cli run-parent-transmission-report
+	$(PYTHON) -m slr_watch.cli run-treasury-intermediation-report
+	$(PYTHON) -m slr_watch.cli run-policy-regime-panel-report
+	$(PYTHON) -m slr_watch.cli run-constraint-decomposition-report
