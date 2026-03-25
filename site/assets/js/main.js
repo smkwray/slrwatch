@@ -3,76 +3,19 @@
    Theme toggle, navigation, scroll reveals, and chart rendering.
    ======================================================================== */
 
-/* ---- Inline Chart Data ---------------------------------------------- */
-const DATA = {
-  eventStudy: {
-    coefficients: [
-      {
-        treatment: "Low Headroom",
-        broad: { coef: 0.0247, p: 0.0021 },
-        flagship: { coef: 0.0178, p: 0.0515 },
-        clustered: { coef: 0.0178, p: 0.1762 }
-      },
-      {
-        treatment: "Covered Bank",
-        broad: { coef: 0.0197, p: 0.0054 },
-        flagship: { coef: 0.0206, p: 0.0055 },
-        clustered: { coef: 0.0206, p: 0.1626 }
-      },
-      {
-        treatment: "High UST Share",
-        broad: { coef: 0.0023, p: 0.8133 },
-        flagship: { coef: 0.0021, p: 0.8348 },
-        clustered: { coef: 0.0021, p: 0.9059 }
-      }
-    ]
-  },
-  reallocation: [
-    { treatment: "Low Headroom", outcome: "Treasury Inventory", net: 0.0247 },
-    { treatment: "Low Headroom", outcome: "Fed Balances", net: 0.0026 },
-    { treatment: "Low Headroom", outcome: "Deposit Growth", net: -0.0352 },
-    { treatment: "Low Headroom", outcome: "Loan Growth", net: -0.0165 },
-    { treatment: "Covered Bank", outcome: "Treasury Inventory", net: 0.0197 },
-    { treatment: "Covered Bank", outcome: "Fed Balances", net: -0.0045 },
-    { treatment: "Covered Bank", outcome: "Deposit Growth", net: -0.0398 },
-    { treatment: "Covered Bank", outcome: "Loan Growth", net: -0.0232 }
-  ],
-  safeAssets: [
-    { treatment: "Low Headroom", treasury_share: 0.0911, fed_balance: 0.0026, treasury_inv: 0.0247 },
-    { treatment: "Covered Bank", treasury_share: 0.0986, fed_balance: -0.0045, treasury_inv: 0.0197 }
-  ],
-  intermediation: [
-    { treatment: "Low Headroom", trading_assets: -0.0171, treasury_inv: 0.0247 },
-    { treatment: "Covered Bank", trading_assets: -0.0053, treasury_inv: 0.0197 }
-  ],
-  regimes: {
-    labels: ["Pre-Exclusion", "Temporary Exclusion", "Post-Exclusion", "QT Era"],
-    treasury_share: [0.0615, 0.0645, null, null],
-    fed_balance_share: [0.0775, 0.1509, null, null],
-    trading_share: [null, 0.0966, null, 0.0903]
-  },
-  constraintDecomposition: {
-    regimes: [
-      {
-        regime: "Duration Loss Window (2022\u201323)",
-        insured: { leverage: 0.163, duration_loss: 0.659, funding: 0.178 },
-        parent:  { leverage: 0.205, duration_loss: 0.630, funding: 0.165 }
-      },
-      {
-        regime: "Late QT Normalization (2024\u201325)",
-        insured: { leverage: 0.342, duration_loss: 0.421, funding: 0.237 },
-        parent:  { leverage: 0.354, duration_loss: 0.342, funding: 0.304 }
-      }
-    ]
-  },
-  parentTransmission: {
-    co_movement: { ust: 75, trading: 60 },
-    surcharge: {
-      high: { headroom: 0.0087, ust: 0.0926, trading: 0.1401 },
-      low: { headroom: 0.0190, ust: 0.0936, trading: 0.1293 }
-    }
-  }
+/* ---- Generated Site Data -------------------------------------------- */
+const DATA_FILES = {
+  eventStudy: 'assets/data/event_study.json',
+  reallocation: 'assets/data/reallocation.json',
+  safeAssets: 'assets/data/safe_assets.json',
+  intermediation: 'assets/data/intermediation.json',
+  marketContext: 'assets/data/market_context.json',
+  parentTransmission: 'assets/data/parent_transmission.json',
+  policyRegimes: 'assets/data/policy_regimes.json',
+  constraintDecomposition: 'assets/data/constraint_decomposition.json'
 };
+
+let DATA = null;
 
 
 /* ---- Theme Management ----------------------------------------------- */
@@ -168,13 +111,59 @@ function clearChart(id) {
   return c;
 }
 
+function setText(id, value) {
+  const node = document.getElementById(id);
+  if (node) node.textContent = value;
+}
+
+async function loadSiteData() {
+  const entries = await Promise.all(
+    Object.entries(DATA_FILES).map(async ([key, path]) => {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${path}: ${response.status}`);
+      }
+      return [key, await response.json()];
+    })
+  );
+  DATA = Object.fromEntries(entries);
+  return DATA;
+}
+
+function populateEventStudyStats() {
+  if (!DATA || !DATA.eventStudy || !DATA.eventStudy.samples) return;
+  const samples = DATA.eventStudy.samples;
+  setText('descriptive-universe-obs', samples.descriptive_universe.observations);
+  setText('descriptive-universe-entities', samples.descriptive_universe.entities);
+  setText('slr-reporting-obs', samples.slr_reporting.observations);
+  setText('slr-reporting-entities', samples.slr_reporting.entities);
+  setText('primary-core-obs', samples.primary_core.observations);
+  setText('primary-core-entities', samples.primary_core.entities);
+  setText('flagship-obs', samples.flagship_primary.observations);
+  setText('flagship-clusters', samples.flagship_primary.clusters);
+}
+
+function populateConstraintStats() {
+  if (!DATA || !DATA.constraintDecomposition || !DATA.constraintDecomposition.highlights) return;
+  const highlights = DATA.constraintDecomposition.highlights;
+  setText('constraint-insured-duration', (highlights.insured_duration_loss_window * 100).toFixed(1) + '%');
+  setText('constraint-parent-duration', (highlights.parent_duration_loss_window * 100).toFixed(1) + '%');
+  setText('constraint-insured-obs', highlights.insured_observations);
+  setText('constraint-parent-obs', highlights.parent_observations);
+  setText('constraint-family-match', (highlights.family_match_duration_loss_window * 100).toFixed(1) + '%');
+  setText('constraint-family-both-duration', (highlights.family_both_duration_loss_window * 100).toFixed(1) + '%');
+}
+
 
 /* ---- Chart: Coefficient Dot Plot ------------------------------------ */
 function renderDotPlot() {
   const container = clearChart('chart-dot-plot');
-  if (!container) return;
+  if (!container || !DATA || !DATA.eventStudy) return;
 
-  const data = DATA.eventStudy.coefficients;
+  const data = (DATA.eventStudy.coefficients || []).filter(
+    row => row.outcome === 'Treasury Inventory / Assets'
+  );
+  if (!data.length) return;
   const W = 700, H = 220;
   const margin = { top: 30, right: 30, bottom: 40, left: 160 };
   const plotW = W - margin.left - margin.right;
@@ -207,7 +196,7 @@ function renderDotPlot() {
   svg.appendChild(xTitle);
 
   const sampleColors = [getCSS('--chart-1'), getCSS('--chart-2'), getCSS('--chart-3')];
-  const samples = ['broad', 'flagship', 'clustered'];
+  const samples = ['primary', 'expanded', 'flagship_clustered'];
   const offsets = [-8, 0, 8];
   const dotR = 6;
 
@@ -224,7 +213,7 @@ function renderDotPlot() {
 
     // dots for each sample
     samples.forEach((s, si) => {
-      const d = row[s] || row[samples[si]];
+      const d = row[s];
       if (!d) return;
       const cx = xScale(d.coef);
       const cy = y + offsets[si];
@@ -262,9 +251,14 @@ function renderDotPlot() {
 /* ---- Chart: Safe-Asset Composition ---------------------------------- */
 function renderSafeAssetChart() {
   const container = clearChart('chart-safe-assets');
-  if (!container) return;
+  if (!container || !DATA || !DATA.safeAssets) return;
 
-  const data = DATA.safeAssets;
+  const data = (DATA.safeAssets.data || []).map(row => ({
+    treatment: row.treatment,
+    treasury_share: row.treasury_share_net,
+    treasury_inv: row.treasury_inventory_net,
+    fed_balance: row.fed_balance_net
+  }));
   const W = 600, H = 240;
   const margin = { top: 20, right: 30, bottom: 50, left: 140 };
   const plotW = W - margin.left - margin.right;
@@ -356,9 +350,13 @@ function renderSafeAssetChart() {
 /* ---- Chart: Intermediation Tradeoff (Diverging Bar) ----------------- */
 function renderIntermediationChart() {
   const container = clearChart('chart-intermediation');
-  if (!container) return;
+  if (!container || !DATA || !DATA.intermediation) return;
 
-  const data = DATA.intermediation;
+  const data = (DATA.intermediation.net_changes || []).map(row => ({
+    treatment: row.treatment,
+    trading_assets: row.trading_assets,
+    treasury_inv: row.treasury_inventory
+  }));
   const W = 600, H = 200;
   const margin = { top: 20, right: 50, bottom: 50, left: 140 };
   const plotW = W - margin.left - margin.right;
@@ -456,7 +454,7 @@ function renderIntermediationChart() {
 /* ---- Chart: Regime Comparison (Dumbbell) ----------------------------- */
 function renderRegimeChart() {
   const container = clearChart('chart-regimes');
-  if (!container) return;
+  if (!container || !DATA || !DATA.policyRegimes) return;
 
   const W = 600, H = 200;
   const margin = { top: 20, right: 40, bottom: 50, left: 200 };
@@ -465,11 +463,25 @@ function renderRegimeChart() {
 
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart-svg' });
 
+  const metrics = DATA.policyRegimes.metrics || [];
+  const metricByLabel = Object.fromEntries(metrics.map(row => [row.label, row]));
   const rows = [
-    { label: 'Treasury Share (Insured)', v1: 0.0615, v2: 0.0645, era1: 'Pre', era2: 'Exclusion' },
-    { label: 'Fed-Balance Share (Insured)', v1: 0.0775, v2: 0.1509, era1: 'Pre', era2: 'Exclusion' },
-    { label: 'Trading-Assets Share (Parent)', v1: 0.0966, v2: 0.0903, era1: 'Exclusion', era2: 'QT Era' }
-  ];
+    {
+      label: 'Treasury Share (Insured)',
+      v1: metricByLabel['Insured-Bank Treasury Share']?.pre_exclusion,
+      v2: metricByLabel['Insured-Bank Treasury Share']?.temporary_exclusion
+    },
+    {
+      label: 'Fed-Balance Share (Insured)',
+      v1: metricByLabel['Insured-Bank Fed-Balance Share']?.pre_exclusion,
+      v2: metricByLabel['Insured-Bank Fed-Balance Share']?.temporary_exclusion
+    },
+    {
+      label: 'Trading-Assets Share (Parent)',
+      v1: metricByLabel['Parent Trading-Assets Share']?.temporary_exclusion,
+      v2: metricByLabel['Parent Trading-Assets Share']?.qt_era
+    }
+  ].filter(row => row.v1 != null && row.v2 != null);
 
   const maxVal = 0.18;
   const xScale = v => margin.left + (v / maxVal) * plotW;
@@ -553,7 +565,7 @@ function renderRegimeChart() {
 /* ---- Chart: Parent Transmission Co-Movement ------------------------- */
 function renderTransmissionChart() {
   const container = clearChart('chart-transmission');
-  if (!container) return;
+  if (!container || !DATA || !DATA.parentTransmission) return;
 
   const W = 500, H = 200;
   const margin = { top: 20, right: 30, bottom: 50, left: 180 };
@@ -562,9 +574,10 @@ function renderTransmissionChart() {
 
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart-svg' });
 
+  const coMovement = DATA.parentTransmission.co_movement || {};
   const bars = [
-    { label: 'UST Holdings Co-Movement', value: 75 },
-    { label: 'Trading Assets Co-Movement', value: 60 }
+    { label: 'UST Holdings Co-Movement', value: coMovement.ust_holdings?.pct || 0 },
+    { label: 'Trading Assets Co-Movement', value: coMovement.trading_assets?.pct || 0 }
   ];
 
   const xScale = v => margin.left + (v / 100) * plotW;
@@ -634,7 +647,7 @@ function renderTransmissionChart() {
 /* ---- Chart: Surcharge Comparison ------------------------------------ */
 function renderSurchargeChart() {
   const container = clearChart('chart-surcharge');
-  if (!container) return;
+  if (!container || !DATA || !DATA.parentTransmission) return;
 
   const W = 550, H = 200;
   const margin = { top: 20, right: 30, bottom: 50, left: 130 };
@@ -643,11 +656,11 @@ function renderSurchargeChart() {
 
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart-svg' });
 
-  const d = DATA.parentTransmission.surcharge;
+  const d = DATA.parentTransmission.surcharge_comparison;
   const metrics = [
-    { label: 'Bank SLR Headroom (pp)', high: d.high.headroom, low: d.low.headroom, scale: 0.025 },
-    { label: 'Bank UST / Assets', high: d.high.ust, low: d.low.ust, scale: 0.12 },
-    { label: 'Parent Trading / Assets', high: d.high.trading, low: d.low.trading, scale: 0.18 }
+    { label: 'Bank SLR Headroom (pp)', high: d.high_surcharge.bank_headroom_pp, low: d.low_surcharge.bank_headroom_pp, scale: 0.025 },
+    { label: 'Bank UST / Assets', high: d.high_surcharge.bank_ust_assets, low: d.low_surcharge.bank_ust_assets, scale: 0.12 },
+    { label: 'Parent Trading / Assets', high: d.high_surcharge.parent_trading_assets, low: d.low_surcharge.parent_trading_assets, scale: 0.18 }
   ];
 
   const rowH = plotH / metrics.length;
@@ -698,9 +711,9 @@ function renderSurchargeChart() {
 /* ---- Chart: Constraint Decomposition (Stacked Bar) ------------------ */
 function renderConstraintChart() {
   const container = clearChart('chart-constraints');
-  if (!container) return;
+  if (!container || !DATA || !DATA.constraintDecomposition) return;
 
-  const data = DATA.constraintDecomposition.regimes;
+  const data = DATA.constraintDecomposition.regimes || [];
   const rows = [];
   data.forEach(d => {
     rows.push({ label: 'Insured Banks', regime: d.regime, ...d.insured });
@@ -809,6 +822,7 @@ function renderConstraintChart() {
 
 /* ---- Render All Charts ---------------------------------------------- */
 function renderAllCharts() {
+  if (!DATA) return;
   renderDotPlot();
   renderSafeAssetChart();
   renderIntermediationChart();
@@ -820,11 +834,18 @@ function renderAllCharts() {
 
 
 /* ---- Init ----------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   updateThemeIcon();
   initReveal();
   initActiveNav();
-  renderAllCharts();
+  try {
+    await loadSiteData();
+    populateEventStudyStats();
+    populateConstraintStats();
+    renderAllCharts();
+  } catch (error) {
+    console.error('Failed to load site data', error);
+  }
 
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   const menuBtn = document.querySelector('.nav-menu-btn');

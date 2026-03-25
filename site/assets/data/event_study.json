@@ -1,36 +1,95 @@
 {
   "samples": {
-    "broad": { "observations": 232, "entities": 21 },
-    "flagship": { "observations": 180, "entities": 15 }
+    "descriptive_universe": {
+      "observations": 61626,
+      "entities": 5488
+    },
+    "slr_reporting": {
+      "observations": 426,
+      "entities": 37
+    },
+    "treatment_definable": {
+      "observations": 233,
+      "entities": 20
+    },
+    "primary_core": {
+      "observations": 228,
+      "entities": 19
+    },
+    "expanded_sensitivity": {
+      "observations": 228,
+      "entities": 19
+    },
+    "flagship_primary": {
+      "observations": 204,
+      "entities": 17,
+      "clusters": 17
+    }
   },
   "coefficients": [
     {
       "treatment": "Low Headroom",
       "outcome": "Treasury Inventory / Assets",
-      "broad": { "coef": 0.0247, "p": 0.0021 },
-      "flagship": { "coef": 0.0178, "p": 0.0515 },
-      "flagship_clustered": { "coef": 0.0178, "p": 0.1762 }
+      "primary": {
+        "coef": 0.0178411967687176,
+        "p": 0.0161444185235847
+      },
+      "expanded": {
+        "coef": 0.0178411967687176,
+        "p": 0.0161444185235847
+      },
+      "flagship_clustered": {
+        "coef": 0.0176446977717609,
+        "p": 0.1813379600740043
+      }
     },
     {
       "treatment": "Covered Bank",
       "outcome": "Treasury Inventory / Assets",
-      "broad": { "coef": 0.0197, "p": 0.0054 },
-      "flagship": { "coef": 0.0206, "p": 0.0055 },
-      "flagship_clustered": { "coef": 0.0206, "p": 0.1626 }
+      "primary": {
+        "coef": 0.0162493580658499,
+        "p": 0.0212046422440857
+      },
+      "expanded": {
+        "coef": 0.0162493580658499,
+        "p": 0.0212046422440857
+      },
+      "flagship_clustered": {
+        "coef": 0.0160907508428661,
+        "p": 0.2451972545675338
+      }
     },
     {
       "treatment": "High UST Share",
       "outcome": "Treasury Inventory / Assets",
-      "broad": { "coef": 0.0023, "p": 0.8133 },
-      "flagship": { "coef": 0.0021, "p": 0.8348 },
-      "flagship_clustered": { "coef": 0.0021, "p": 0.9059 }
+      "primary": {
+        "coef": 0.003705648021187,
+        "p": 0.6656974857383491
+      },
+      "expanded": {
+        "coef": 0.003705648021187,
+        "p": 0.6656974857383491
+      },
+      "flagship_clustered": {
+        "coef": 0.0025446729593229,
+        "p": 0.8716421860288439
+      }
     },
     {
       "treatment": "High UST Share",
       "outcome": "Trading Assets / Assets",
-      "broad": { "coef": -0.0213, "p": 0.0137 },
-      "flagship": { "coef": -0.0214, "p": 0.0134 },
-      "flagship_clustered": { "coef": -0.0214, "p": 0.1717 }
+      "primary": {
+        "coef": -0.0153632766097366,
+        "p": 0.0363015776768096
+      },
+      "expanded": {
+        "coef": -0.0153632766097366,
+        "p": 0.0363015776768096
+      },
+      "flagship_clustered": {
+        "coef": -0.0154280997226329,
+        "p": 0.2653497637542581
+      }
     }
   ]
 }

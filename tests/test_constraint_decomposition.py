@@ -84,6 +84,7 @@ def test_run_constraint_decomposition_report(tmp_path: Path) -> None:
     assert result == output_dir
     assert (output_dir / "prepared_panel.csv").exists()
     assert (output_dir / "coverage_summary.csv").exists()
+    assert (output_dir / "coverage_manifest.csv").exists()
     assert (output_dir / "regime_summary.csv").exists()
     assert (output_dir / "absorption_summary.csv").exists()
     assert (output_dir / "regime_comparison.csv").exists()
@@ -99,6 +100,9 @@ def test_run_constraint_decomposition_report(tmp_path: Path) -> None:
 
     coverage = pd.read_csv(output_dir / "coverage_summary.csv")
     assert set(coverage["entity_source"]) == {"insured_bank", "parent_or_ihc"}
+    coverage_manifest = pd.read_csv(output_dir / "coverage_manifest.csv")
+    assert "entity_name" in coverage_manifest.columns
+    assert "policy_regime_count" in coverage_manifest.columns
 
     regime_summary = pd.read_csv(output_dir / "regime_summary.csv")
     assert "duration_loss_window" in set(regime_summary["policy_regime"])

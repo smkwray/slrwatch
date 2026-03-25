@@ -20,14 +20,17 @@ from .ingest.call_reports import (
     stage_call_report_zip,
     write_merged_call_report_bulk_folder,
 )
+from .ingest.fdic_institutions import build_fdic_institutions_reference
 from .ingest.fry15 import build_method1_surcharge_overlay
 from .ingest.fry9c import download_fry9c, historical_chicago_fed_url, stage_fry9c_file
 from .ingest.market_overlays import build_market_overlay_panel
 from .ingest.nyfed_primary_dealers import build_primary_dealer_overlay
 from .ingest.trace_treasury import build_trace_treasury_overlay
+from .insured_banks import build_all_insured_bank_panel, ensure_insured_bank_override_template
 from .panels import build_crosswalk, build_insured_bank_panel, build_parent_panel
 from .quarters import QuarterRef
 from .source_manifest import format_sources_for_cli
+from .site_data import build_site_data
 
 
 def cmd_print_sources(_: argparse.Namespace) -> int:
@@ -130,6 +133,31 @@ def cmd_build_insured_panel(args: argparse.Namespace) -> int:
         Path(args.crosswalk),
         output_path=Path(args.output) if args.output else None,
     )
+    print(f"Wrote {path}")
+    return 0
+
+
+def cmd_build_all_insured_panel(args: argparse.Namespace) -> int:
+    override_path = Path(args.overrides) if args.overrides else None
+    if override_path is not None:
+        ensure_insured_bank_override_template(override_path)
+    written = build_all_insured_bank_panel(
+        Path(args.staged_path),
+        crosswalk_path=Path(args.crosswalk) if args.crosswalk else None,
+        overrides_path=override_path,
+        fdic_metadata_path=Path(args.fdic_metadata) if args.fdic_metadata else None,
+        output_path=Path(args.output) if args.output else None,
+        universe_output_path=Path(args.universe_output) if args.universe_output else None,
+        coverage_output_path=Path(args.coverage_output) if args.coverage_output else None,
+        manifest_output_path=Path(args.manifest_output) if args.manifest_output else None,
+    )
+    for path in written.values():
+        print(f"Wrote {path}")
+    return 0
+
+
+def cmd_build_fdic_institutions(args: argparse.Namespace) -> int:
+    path = build_fdic_institutions_reference(output_path=Path(args.output) if args.output else None)
     print(f"Wrote {path}")
     return 0
 
@@ -261,6 +289,16 @@ def cmd_run_constraint_decomposition_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_build_site_data(args: argparse.Namespace) -> int:
+    written = build_site_data(
+        reports_root=Path(args.reports_root) if args.reports_root else None,
+        output_dir=Path(args.output_dir) if args.output_dir else None,
+    )
+    for path in written:
+        print(f"Wrote {path}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="slr-watch")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -320,6 +358,17 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output")
     p.set_defaults(func=cmd_build_insured_panel)
 
+    p = sub.add_parser("build-all-insured-panel", help="Build the full insured-bank descriptive panel and coverage artifacts")
+    p.add_argument("--staged-path", default=str(data_path("staging", "call_reports")))
+    p.add_argument("--crosswalk", default=str(derived_data_path("crosswalk_v1.parquet")))
+    p.add_argument("--overrides", default=str(reference_data_path("insured_bank_metadata_overrides.csv")))
+    p.add_argument("--fdic-metadata", default=str(derived_data_path("fdic_institutions.csv")))
+    p.add_argument("--output", default=str(derived_data_path("insured_bank_descriptive_panel.parquet")))
+    p.add_argument("--universe-output", default=str(derived_data_path("insured_bank_universe.csv")))
+    p.add_argument("--coverage-output", default=str(derived_data_path("insured_bank_coverage_by_quarter.csv")))
+    p.add_argument("--manifest-output", default=str(derived_data_path("insured_bank_sample_manifest.csv")))
+    p.set_defaults(func=cmd_build_all_insured_panel)
+
     p = sub.add_parser("build-parent-panel", help="Build the parent and IHC panel from staged FR Y-9C")
     p.add_argument("--staged-path", default=str(data_path("staging", "fry9c")))
     p.add_argument("--crosswalk", default=str(derived_data_path("crosswalk_v1.parquet")))
@@ -331,6 +380,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--input", help="Optional OFR Basel Scores workbook path")
     p.add_argument("--output")
     p.set_defaults(func=cmd_build_fry15_overlay)
+
+    p = sub.add_parser("build-fdic-institutions", help="Fetch the FDIC institutions metadata reference")
+    p.add_argument("--output", default=str(derived_data_path("fdic_institutions.csv")))
+    p.set_defaults(func=cmd_build_fdic_institutions)
 
     p = sub.add_parser("build-primary-dealer-overlay", help="Build the NY Fed primary dealer quarterly market overlay")
     p.add_argument("--start-date", default="2019-01-01")
@@ -350,7 +403,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_build_market_overlay_panel)
 
     p = sub.add_parser("run-event-study", help="Run the 2020 temporary exclusion event study")
-    p.add_argument("--panel", default=str(derived_data_path("insured_bank_panel.parquet")))
+    p.add_argument("--panel", default=str(derived_data_path("insured_bank_descriptive_panel.parquet")))
     p.add_argument("--market-panel", default=str(derived_data_path("market_overlay_panel.parquet")))
     p.add_argument("--output-dir", default=str(reports_path("event_2020")))
     p.set_defaults(func=cmd_run_event_study)
@@ -394,6 +447,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--parent-panel", default=str(derived_data_path("parent_panel.parquet")))
     p.add_argument("--output-dir", default=str(reports_path("constraint_decomposition")))
     p.set_defaults(func=cmd_run_constraint_decomposition_report)
+
+    p = sub.add_parser("build-site-data", help="Build static-site JSON payloads from report outputs")
+    p.add_argument("--reports-root", default=str(reports_path()))
+    p.add_argument("--output-dir", default=str(repo_root() / "site" / "assets" / "data"))
+    p.set_defaults(func=cmd_build_site_data)
     return parser
 
 

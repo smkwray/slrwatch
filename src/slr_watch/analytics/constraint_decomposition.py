@@ -160,6 +160,45 @@ def _coverage_summary(frame: pd.DataFrame) -> pd.DataFrame:
     return summary
 
 
+def _coverage_manifest(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return pd.DataFrame(
+            columns=[
+                "entity_source",
+                "entity_id",
+                "entity_name",
+                "observation_count",
+                "quarter_count",
+                "first_quarter",
+                "last_quarter",
+                "policy_regime_count",
+                "first_policy_regime",
+                "last_policy_regime",
+            ]
+        )
+
+    working = frame.copy()
+    if "entity_name" not in working.columns:
+        working["entity_name"] = working["entity_id"]
+
+    manifest = (
+        working.groupby(["entity_source", "entity_id", "entity_name"], dropna=False)
+        .agg(
+            observation_count=("quarter_end", "size"),
+            quarter_count=("quarter_end", "nunique"),
+            first_quarter=("quarter_end", "min"),
+            last_quarter=("quarter_end", "max"),
+            policy_regime_count=("policy_regime", "nunique"),
+            first_policy_regime=("policy_regime", "first"),
+            last_policy_regime=("policy_regime", "last"),
+        )
+        .reset_index()
+    )
+    manifest["first_quarter"] = pd.to_datetime(manifest["first_quarter"])
+    manifest["last_quarter"] = pd.to_datetime(manifest["last_quarter"])
+    return manifest.sort_values(["entity_source", "entity_name", "entity_id"]).reset_index(drop=True)
+
+
 def _regime_summary(frame: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     for (entity_source, policy_regime), sample in frame.dropna(subset=["policy_regime"]).groupby(
@@ -524,6 +563,7 @@ def _interaction_regression_summary(frame: pd.DataFrame) -> pd.DataFrame:
 
 def _write_summary(
     coverage: pd.DataFrame,
+    coverage_manifest: pd.DataFrame,
     summary: pd.DataFrame,
     absorption: pd.DataFrame,
     regime_comparison: pd.DataFrame,
@@ -561,6 +601,8 @@ def _write_summary(
             f"- `{source}`: {int(row['entity_count'])} entities, {int(row['observation_count'])} rows, "
             f"{row['first_quarter'].date()} to {row['last_quarter'].date()}"
         )
+    if not coverage_manifest.empty:
+        lines.append(f"- Detailed entity-level coverage: `{output_path.parent / 'coverage_manifest.csv'}`")
 
     insured = coverage_by_source.get("insured_bank")
     parent = coverage_by_source.get("parent_or_ihc")
@@ -686,6 +728,7 @@ def run_constraint_decomposition_report(
     prepared = prepared.dropna(subset=["policy_regime"]).reset_index(drop=True)
 
     coverage = _coverage_summary(prepared)
+    coverage_manifest = _coverage_manifest(prepared)
     summary = _regime_summary(prepared)
     absorption = _absorption_summary(prepared)
     regime_comparison = _regime_comparison(summary)
@@ -708,6 +751,16 @@ def run_constraint_decomposition_report(
         )
     else:
         write_frame(coverage, destination / "coverage_summary.csv")
+    if not coverage_manifest.empty:
+        write_frame(
+            coverage_manifest.assign(
+                first_quarter=coverage_manifest["first_quarter"].dt.strftime("%Y-%m-%d"),
+                last_quarter=coverage_manifest["last_quarter"].dt.strftime("%Y-%m-%d"),
+            ),
+            destination / "coverage_manifest.csv",
+        )
+    else:
+        write_frame(coverage_manifest, destination / "coverage_manifest.csv")
     write_frame(summary, destination / "regime_summary.csv")
     write_frame(absorption, destination / "absorption_summary.csv")
     write_frame(regime_comparison, destination / "regime_comparison.csv")
@@ -715,6 +768,7 @@ def run_constraint_decomposition_report(
     write_frame(interaction_regressions, destination / "interaction_regime_summary.csv")
     _write_summary(
         coverage,
+        coverage_manifest,
         summary,
         absorption,
         regime_comparison,

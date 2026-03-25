@@ -12,17 +12,36 @@ When the Fed temporarily excluded Treasuries and reserves from SLR in April 2020
 
 ## Core finding: the 2020 SLR exclusion
 
-Banks that appear more balance-sheet constrained increased Treasury holdings more after the temporary exclusion than comparison banks did.
+Banks that appear more balance-sheet constrained increased Treasury holdings more after the temporary exclusion than comparison banks did, but the repo now distinguishes the descriptive universe from the causal SLR sample instead of treating them as the same object.
 
-**Broad sample (21 entities, 232 bank-quarter observations):**
-- Low-headroom banks: +2.47pp Treasury inventory increase relative to controls (p = 0.002)
-- Covered-bank subsidiaries: +1.97pp (p = 0.005)
+**Universe A: all insured-bank descriptive universe (2019Q1-2021Q4)**
+- 5,488 insured-bank filers
+- 61,626 bank-quarter observations
 
-**Flagship clustered inference (15 parent clusters):**
-- Low headroom: +1.78pp (p = 0.176)
-- Covered bank: +2.06pp (p = 0.163)
+**Universe B: SLR-reporting insured banks**
+- 37 entities
+- 426 bank-quarter observations
 
-Under parent-level clustering in the flagship sample, coefficients retain sign and magnitude but lose conventional significance. These results should be described as directional evidence rather than a settled causal estimate.
+**Universe C: treatment-definable SLR sample**
+- 20 entities
+- 233 bank-quarter observations
+- Requires a usable 2019Q4 baseline for treatment assignment
+
+**Universe D: primary causal core**
+- 19 entities
+- 228 balanced bank-quarter observations
+- Low-headroom banks: +1.78pp Treasury inventory increase relative to controls (p = 0.016)
+- Covered-bank subsidiaries: +1.62pp (p = 0.021)
+
+**Universe F: flagship per-parent clustered inference (17 parent clusters)**
+- 17 entities
+- 204 bank-quarter observations
+- Low headroom: +1.76pp (p = 0.181)
+- Covered bank: +1.61pp (p = 0.245)
+
+Under parent-level clustering in the flagship sample, coefficients retain sign and approximate magnitude but lose conventional significance. These results should be described as directional evidence rather than a settled causal estimate.
+
+The repo now also writes explicit diagnostics. In Universe D, the Treasury pre-trend joint p-values are 0.103 for the low-headroom split and 0.333 for the covered-bank split. But the low-headroom split shows a nontrivial fake-date placebo in the clustered flagship sample (+2.30pp, p = 0.010 before the actual exemption window), so the covered-bank treatment is currently the cleaner regulatory treatment and the low-headroom split should be treated more cautiously.
 
 ## Mechanism evidence
 
@@ -30,7 +49,7 @@ Five extension reports support the core result with a consistent mechanism story
 
 - **Reallocation, not expansion.** Constrained banks shifted balance-sheet capacity toward Treasuries while reducing deposits and loans. Low-headroom banks: Treasury +2.47pp, deposit growth -3.52pp, loan growth -1.65pp.
 - **Safe-asset composition shift.** The response was within safe assets, not just between safe and risky. Covered banks shifted their safe-asset mix toward Treasuries by +9.86pp relative to controls.
-- **Family-level transmission.** Bank and parent Treasury-share changes moved in the same direction in 75% of linked quarter-over-quarter comparisons across 15 parent families.
+- **Family-level transmission.** Bank and parent Treasury-share changes moved in the same direction in 73.3% of linked quarter-over-quarter comparisons across 16 parent families.
 - **Trading-balance-sheet tradeoff.** Constrained banks reduced trading-asset share while Treasury holdings rose, consistent with leverage-capacity reallocation.
 - **Policy-regime context.** A longer quarterly panel (2019-2026) places the 2020 event within a broader safe-asset absorption story across pre-exclusion, exclusion, post-exclusion, and QT-era regimes.
 
@@ -92,6 +111,8 @@ python -m slr_watch.cli stage-fry9c --quarter 2025Q4 --input data/raw/fry9c/2025
 
 # Build panels
 python -m slr_watch.cli build-crosswalk
+python -m slr_watch.cli build-fdic-institutions
+python -m slr_watch.cli build-all-insured-panel
 python -m slr_watch.cli build-insured-panel
 python -m slr_watch.cli build-parent-panel
 
@@ -103,7 +124,10 @@ python -m slr_watch.cli run-parent-transmission-report
 python -m slr_watch.cli run-treasury-intermediation-report
 python -m slr_watch.cli run-policy-regime-panel-report
 python -m slr_watch.cli run-constraint-decomposition-report
+python -m slr_watch.cli build-site-data
 ```
+
+The event-study pipeline now writes `output/reports/event_2020/sample_manifest.csv`, `sample_ladder.csv`, `methodology_memo.md`, and `gpt_pro_next_steps_prompt.md` so the exact descriptive universe, causal sample ladder, exclusion reasons, and next-question handoff are explicit.
 
 See `python -m slr_watch.cli --help` for the full command set.
 

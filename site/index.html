@@ -58,11 +58,12 @@
   <div class="container">
     <div class="highlights reveal">
       <div class="highlight-card">
-        <div class="stat positive">+2.47pp</div>
-        <div class="stat-label">Treasury Inventory Increase</div>
+        <div class="stat positive">+1.62pp</div>
+        <div class="stat-label">Covered-Bank Treasury Response</div>
         <div class="stat-desc">
-          Low-headroom banks increased Treasury holdings relative to controls
-          after the 2020 temporary SLR exclusion (broad sample, p&nbsp;=&nbsp;0.002).
+          Covered-bank subsidiaries increased Treasury holdings relative to
+          controls after the 2020 temporary SLR exclusion in the balanced
+          primary core (Universe&nbsp;D, p&nbsp;=&nbsp;0.021).
         </div>
       </div>
       <div class="highlight-card">
@@ -74,20 +75,21 @@
         </div>
       </div>
       <div class="highlight-card">
-        <div class="stat neutral">75%</div>
+        <div class="stat neutral">73.3%</div>
         <div class="stat-label">Family Co-Movement</div>
         <div class="stat-desc">
           Bank and parent Treasury-share changes moved in the same direction
-          in three-quarters of linked quarter-over-quarter comparisons.
+          in the linked quarter-over-quarter sample.
         </div>
       </div>
     </div>
 
     <div class="caveat reveal" style="margin-top:32px">
       <strong>Inference note.</strong> Under parent-level clustering in the
-      flagship sample (15 clusters), the headline Treasury coefficients
+      flagship sample (17 clusters), the headline Treasury coefficients
       retain their sign and approximate magnitude but lose conventional
-      significance (p&nbsp;&asymp;&nbsp;0.17). The right language is
+      significance (low headroom p&nbsp;=&nbsp;0.181; covered-bank p&nbsp;=&nbsp;0.245).
+      The right language is
       <em>directional evidence</em>, not a settled causal estimate.
     </div>
   </div>
@@ -113,21 +115,21 @@
     <div class="chart-wrapper reveal">
       <div class="chart-title">Coefficient Comparison: Treasury Inventory / Assets</div>
       <div class="chart-subtitle">
-        DiD coefficient across three sample/specification variants &middot; Outcome: Treasury inventory scaled by total assets
+        DiD coefficient across the primary core, expanded sensitivity, and clustered flagship variants &middot; Outcome: Treasury inventory scaled by total assets
       </div>
       <div class="chart-container" id="chart-dot-plot"></div>
       <div class="chart-legend">
         <div class="chart-legend-item">
           <div class="chart-legend-dot" style="background:var(--chart-1)"></div>
-          Broad sample (HC1)
+          Primary core (Universe D)
         </div>
         <div class="chart-legend-item">
           <div class="chart-legend-dot" style="background:var(--chart-2)"></div>
-          Flagship per-parent (HC1)
+          Expanded sensitivity (Universe E)
         </div>
         <div class="chart-legend-item">
           <div class="chart-legend-dot" style="background:var(--chart-3);opacity:0.5;border:2px solid var(--chart-3)"></div>
-          Flagship clustered (parent)
+          Flagship clustered (Universe F)
         </div>
         <div class="chart-legend-item" style="margin-left:12px;color:var(--text-tertiary)">
           Filled = p &lt; 0.05 &nbsp;|&nbsp; Hollow = p &ge; 0.05
@@ -142,7 +144,9 @@
           The <code>low_headroom_treated</code> and
           <code>covered_bank_treated</code> coefficients are positive and
           economically meaningful across all three sample variants. In the
-          broad sample, both are significant at the 1% level.
+          primary balanced core, both remain statistically significant at
+          conventional levels, with the covered-bank split providing the
+          cleaner regulatory treatment.
         </p>
       </div>
       <div class="card">
@@ -150,8 +154,9 @@
         <p>
           The <code>high_ust_share_treated</code> coefficient is near zero
           and insignificant everywhere. The flagship-clustered results lose
-          conventional significance, so the headline should be framed as
-          suggestive rather than definitive.
+          conventional significance, and the low-headroom split shows a
+          nontrivial fake-date placebo before the actual exemption window,
+          so the headline should be framed as suggestive rather than definitive.
         </p>
       </div>
     </div>
@@ -159,19 +164,35 @@
     <!-- Sample details -->
     <div class="stat-grid reveal" style="margin-top:32px">
       <div class="stat-item">
-        <div class="stat-value">232</div>
-        <div class="stat-label">Broad sample observations</div>
+        <div class="stat-value" id="descriptive-universe-obs">61626</div>
+        <div class="stat-label">Descriptive-universe observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">21</div>
-        <div class="stat-label">Distinct entities (broad)</div>
+        <div class="stat-value" id="descriptive-universe-entities">5488</div>
+        <div class="stat-label">Descriptive-universe entities</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">180</div>
+        <div class="stat-value" id="slr-reporting-obs">426</div>
+        <div class="stat-label">Universe B observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="slr-reporting-entities">37</div>
+        <div class="stat-label">Universe B entities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="primary-core-obs">228</div>
+        <div class="stat-label">Universe D observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="primary-core-entities">19</div>
+        <div class="stat-label">Universe D entities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="flagship-obs">204</div>
         <div class="stat-label">Flagship sample observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">15</div>
+        <div class="stat-value" id="flagship-clusters">17</div>
         <div class="stat-label">Parent clusters (flagship)</div>
       </div>
     </div>
@@ -239,13 +260,19 @@
         <div class="step-content">
           <h4>Sample Construction</h4>
           <p>
-            The universe covers U.S. GSIB parents, major insured-bank subsidiaries,
-            large non-GSIB controls, and U.S. IHCs of foreign banking organizations.
-            The <strong>broad sample</strong> includes 21 entities (232 bank-quarter
-            observations). The <strong>flagship per-parent sample</strong> restricts
-            to the single largest insured subsidiary per parent family&mdash;15 entities,
-            15 parent clusters, 180 observations&mdash;to avoid double-counting families
-            with multiple large subsidiaries.
+            The repo now starts from the full insured-bank Call Report filing universe
+            in the staged FFIEC bulk data: 5,488 entities and 61,626 bank-quarter
+            observations in the 2019&ndash;Q1 to 2021&ndash;Q4 descriptive layer.
+            The causal sample is then narrowed explicitly: 37 SLR-reporting insured
+            banks in Universe&nbsp;B, 20 treatment-definable banks in Universe&nbsp;C
+            with a usable 2019&ndash;Q4 baseline,
+            19 fully balanced banks in the primary causal core (Universe&nbsp;D), and
+            17 banks / 17 parent clusters in the flagship per-parent sample (Universe&nbsp;F).
+          </p>
+          <p>
+            The repo publishes a sample manifest, a sample ladder, and a methodology
+            memo in the event-study outputs so the exact included entities and exclusion
+            reasons are visible rather than implied by aggregate counts.
           </p>
         </div>
       </div>
@@ -326,12 +353,14 @@
     </div>
 
     <div class="caveat reveal">
-      <strong>Clustered-inference caveat.</strong> With 15 parent clusters in the
+      <strong>Clustered-inference caveat.</strong> With 17 parent clusters in the
       flagship sample, asymptotic cluster-robust variance estimates are known to
       over-reject. The repo reports both HC1 and parent-clustered standard errors;
       readers should weight the clustered column as the conservative bound. The
       headline coefficients retain their sign and approximate magnitude under
-      clustering, but p-values rise from &lt;&nbsp;0.01 to roughly 0.17.
+      clustering, but p-values rise to roughly 0.18 for low headroom and 0.25 for
+      covered-bank status. The repo also reports a fake-date placebo; that check is
+      more concerning for the low-headroom split than for the covered-bank split.
     </div>
   </div>
 </section>
@@ -454,8 +483,8 @@
       <h3>Parent&ndash;Bank Transmission</h3>
       <p>
         The insured-bank Treasury result sits inside broader family-level
-        balance-sheet behavior. Linked-family analysis covers 100 bank-parent
-        quarter observations across 15 parent families.
+        balance-sheet behavior. Linked-family analysis now covers 407 bank-parent
+        quarter observations across 16 parent families.
       </p>
       <div class="grid-2">
         <div class="chart-wrapper">
@@ -581,27 +610,27 @@
 
     <div class="stat-grid reveal" style="margin-top:32px;margin-bottom:32px">
       <div class="stat-item">
-        <div class="stat-value">65.9%</div>
+        <div class="stat-value" id="constraint-insured-duration">65.9%</div>
         <div class="stat-label">Banks: duration-loss dominant in 2022&ndash;2023</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">63.0%</div>
+        <div class="stat-value" id="constraint-parent-duration">63.0%</div>
         <div class="stat-label">Parents: duration-loss dominant in 2022&ndash;2023</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">539</div>
+        <div class="stat-value" id="constraint-insured-obs">539</div>
         <div class="stat-label">Insured-bank observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">393</div>
+        <div class="stat-value" id="constraint-parent-obs">393</div>
         <div class="stat-label">Parent / IHC observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">64.8%</div>
+        <div class="stat-value" id="constraint-family-match">64.8%</div>
         <div class="stat-label">Linked families match in 2022&ndash;2023</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">48.6%</div>
+        <div class="stat-value" id="constraint-family-both-duration">48.6%</div>
         <div class="stat-label">Both bank and parent duration-loss dominated</div>
       </div>
     </div>
@@ -823,7 +852,8 @@
           <h4>2020 Event Study</h4>
           <p>
             Core DiD estimates and event-time coefficients for the temporary exclusion
-            window. Includes broad, flagship, and flagship-clustered variants.
+            window. Includes the explicit A&ndash;F sample ladder, primary vs expanded
+            causal variants, flagship clustered inference, and a GPT Pro handoff prompt.
           </p>
         </div>
       </div>
