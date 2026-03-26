@@ -76,6 +76,110 @@ def _family_quarter_summary(linked: pd.DataFrame) -> pd.DataFrame:
     return summary
 
 
+def _coverage_manifest(bank: pd.DataFrame, parent: pd.DataFrame, linked: pd.DataFrame) -> pd.DataFrame:
+    bank_frame = bank.copy()
+    parent_frame = parent.copy()
+    linked_frame = linked.copy()
+    bank_frame["quarter_end"] = pd.to_datetime(bank_frame["quarter_end"])
+    parent_frame["quarter_end"] = pd.to_datetime(parent_frame["quarter_end"])
+    if not linked_frame.empty:
+        linked_frame["quarter_end"] = pd.to_datetime(linked_frame["quarter_end"])
+
+    bank_summary = (
+        bank_frame.groupby(["entity_id", "entity_name", "top_parent_rssd"], dropna=False)
+        .agg(
+            bank_panel_observations=("quarter_end", "size"),
+            bank_panel_first_quarter=("quarter_end", "min"),
+            bank_panel_last_quarter=("quarter_end", "max"),
+        )
+        .reset_index()
+    )
+    parent_summary = (
+        parent_frame.groupby("rssd_id", dropna=False)
+        .agg(
+            parent_panel_observations=("quarter_end", "size"),
+            parent_panel_first_quarter=("quarter_end", "min"),
+            parent_panel_last_quarter=("quarter_end", "max"),
+        )
+        .reset_index()
+        .rename(columns={"rssd_id": "top_parent_rssd"})
+    )
+
+    if linked_frame.empty:
+        linked_summary = pd.DataFrame(
+            columns=[
+                "entity_id",
+                "linked_observations",
+                "linked_first_quarter",
+                "linked_last_quarter",
+                "linked_parent_entity_id",
+            ]
+        )
+    else:
+        linked_summary = (
+            linked_frame.groupby("entity_id_bank", dropna=False)
+            .agg(
+                linked_observations=("quarter_end", "size"),
+                linked_first_quarter=("quarter_end", "min"),
+                linked_last_quarter=("quarter_end", "max"),
+                linked_parent_entity_id=("entity_id_parent", "first"),
+            )
+            .reset_index()
+            .rename(columns={"entity_id_bank": "entity_id"})
+        )
+
+    manifest = bank_summary.merge(parent_summary, how="left", on="top_parent_rssd")
+    manifest = manifest.merge(linked_summary, how="left", on="entity_id")
+    manifest["included_linked_sample"] = manifest["linked_observations"].fillna(0).astype(int) > 0
+    manifest["exclusion_reason"] = pd.NA
+    manifest.loc[
+        ~manifest["included_linked_sample"] & manifest["parent_panel_observations"].isna(),
+        "exclusion_reason",
+    ] = "parent_panel_missing"
+    manifest.loc[
+        ~manifest["included_linked_sample"] & manifest["exclusion_reason"].isna(),
+        "exclusion_reason",
+    ] = "no_overlapping_parent_quarters"
+
+    for column in ["bank_panel_observations", "parent_panel_observations", "linked_observations"]:
+        manifest[column] = manifest[column].astype("Int64")
+    for column in [
+        "bank_panel_first_quarter",
+        "bank_panel_last_quarter",
+        "parent_panel_first_quarter",
+        "parent_panel_last_quarter",
+        "linked_first_quarter",
+        "linked_last_quarter",
+    ]:
+        manifest[column] = pd.to_datetime(manifest[column], errors="coerce").dt.strftime("%Y-%m-%d")
+
+    return manifest.sort_values(["included_linked_sample", "entity_name"], ascending=[False, True]).reset_index(drop=True)
+
+
+def _write_coverage_manifest_summary(manifest: pd.DataFrame, output_path: Path) -> None:
+    included = manifest[manifest["included_linked_sample"]].copy()
+    excluded = manifest[~manifest["included_linked_sample"]].copy()
+    lines = [
+        "# Parent Transmission Coverage Manifest",
+        "",
+        "## Linked sample",
+        f"- Included bank subsidiaries: {len(included)}",
+        f"- Excluded bank subsidiaries: {len(excluded)}",
+    ]
+    if not included.empty:
+        lines.append(
+            "- Included entities: " + "; ".join(included["entity_name"].dropna().astype(str).sort_values().tolist())
+        )
+    if excluded.empty:
+        lines.append("- Excluded entities: none")
+    else:
+        for _, row in excluded.sort_values("entity_name").iterrows():
+            lines.append(
+                f"- Excluded: {row['entity_name']} (`{row['entity_id']}`) -> {row['exclusion_reason']}"
+            )
+    output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _directional_agreement(linked: pd.DataFrame, col_bank: str, col_parent: str) -> str:
     """Check whether quarter-over-quarter changes move in the same direction."""
     if col_bank not in linked.columns or col_parent not in linked.columns:
@@ -149,6 +253,7 @@ def _write_summary(
         f"- Unique bank subsidiaries: {n_banks}",
         f"- Unique parent families: {n_families}",
         f"- Quarters covered: {n_quarters} ({q_min} to {q_max})",
+        f"- Detailed coverage manifest: `{output_dir / 'coverage_manifest.csv'}`",
         "",
         "## Directional Co-movement",
     ]
@@ -185,10 +290,13 @@ def run_parent_transmission_report(
 
     linked = _link_panels(bank, parent)
     family_summary = _family_quarter_summary(linked)
+    coverage_manifest = _coverage_manifest(bank, parent, linked)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     write_frame(linked, output_dir / "linked_panel.csv")
     write_frame(family_summary, output_dir / "family_quarter_summary.csv")
+    write_frame(coverage_manifest, output_dir / "coverage_manifest.csv")
+    _write_coverage_manifest_summary(coverage_manifest, output_dir / "coverage_manifest.md")
     _write_summary(linked, family_summary, output_dir)
 
     return output_dir

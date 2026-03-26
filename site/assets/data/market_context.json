@@ -5,8 +5,26 @@
     "end": "2026-Q1"
   },
   "long_run_changes": [
-    { "series": "NY Fed Dealer Net UST Position", "start_val": 233643, "end_val": 511471, "pct_change": 118.9, "unit": "$M" },
-    { "series": "NY Fed UST Repo", "start_val": 1639501, "end_val": 3141963, "pct_change": 91.6, "unit": "$M" },
-    { "series": "TRACE Total Par Volume", "start_val": 40603.6, "end_val": 46757.9, "pct_change": 15.2, "unit": "$B" }
+    {
+      "series": "NY Fed Dealer Net UST Position",
+      "start_val": 233643.0,
+      "end_val": 511471.0,
+      "pct_change": 118.9,
+      "unit": "$M"
+    },
+    {
+      "series": "NY Fed UST Repo",
+      "start_val": 1639501.1538461538,
+      "end_val": 3141963.25,
+      "pct_change": 91.6,
+      "unit": "$M"
+    },
+    {
+      "series": "TRACE Total Par Volume",
+      "start_val": 40603.6,
+      "end_val": 46757.9,
+      "pct_change": 15.2,
+      "unit": "$B"
+    }
   ]
 }

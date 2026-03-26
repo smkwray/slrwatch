@@ -1,0 +1,38 @@
+{
+  "regimes": [
+    {
+      "regime": "Duration Loss Window (2022-23)",
+      "insured": {
+        "leverage": 0.1629629629629629,
+        "duration_loss": 0.6592592592592592,
+        "funding": 0.1777777777777777
+      },
+      "parent": {
+        "leverage": 0.2047244094488189,
+        "duration_loss": 0.6299212598425197,
+        "funding": 0.1653543307086614
+      }
+    },
+    {
+      "regime": "Late QT Normalization (2024-25)",
+      "insured": {
+        "leverage": 0.3421052631578947,
+        "duration_loss": 0.4210526315789473,
+        "funding": 0.2368421052631578
+      },
+      "parent": {
+        "leverage": 0.3544303797468354,
+        "duration_loss": 0.3417721518987341,
+        "funding": 0.3037974683544304
+      }
+    }
+  ],
+  "highlights": {
+    "insured_duration_loss_window": 0.6592592592592592,
+    "parent_duration_loss_window": 0.6299212598425197,
+    "insured_observations": 539,
+    "parent_observations": 393,
+    "family_match_duration_loss_window": 0.6476190476190476,
+    "family_both_duration_loss_window": 0.4857142857142857
+  }
+}

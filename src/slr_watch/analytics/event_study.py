@@ -14,8 +14,9 @@ class EventStudySpec:
     entity_col: str = "entity_id"
     time_col: str = "quarter_end"
     shock_date: date = date(2020, 4, 1)
-    leads: int = 4
-    lags: int = 4
+    leads: int = 5
+    lags: int = 6
+    reference_period: int = -2
 
 
 def add_event_time(frame: pd.DataFrame, *, time_col: str, shock_date: date) -> pd.DataFrame:
@@ -50,5 +51,5 @@ def event_study_terms(spec: EventStudySpec) -> list[str]:
     return [
         f"event_{k:+d}".replace("+", "p").replace("-", "m")
         for k in range(-spec.leads, spec.lags + 1)
-        if k != -1
+        if k != spec.reference_period
     ]

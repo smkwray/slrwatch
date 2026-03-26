@@ -12,26 +12,46 @@ When the Fed temporarily excluded Treasuries and reserves from SLR in April 2020
 
 ## Core finding: the 2020 SLR exclusion
 
-Banks that appear more balance-sheet constrained increased Treasury holdings more after the temporary exclusion than comparison banks did.
+The repo now carries an explicit 2020 insured-bank treatment map. That makes the direct-treatment design methodologically cleaner, but it also broadens the balanced coverage core enough that the earlier positive Treasury signal largely disappears. The current read is cautionary rather than confirmatory.
 
-**Broad sample (21 entities, 232 bank-quarter observations):**
-- Low-headroom banks: +2.47pp Treasury inventory increase relative to controls (p = 0.002)
-- Covered-bank subsidiaries: +1.97pp (p = 0.005)
+**Universe A: all insured-bank descriptive universe (2019Q1-2021Q4)**
+- 5,488 insured-bank filers
+- 61,626 bank-quarter observations
 
-**Flagship clustered inference (15 parent clusters):**
-- Low headroom: +1.78pp (p = 0.176)
-- Covered bank: +2.06pp (p = 0.163)
+**Universe B: SLR-reporting insured banks**
+- 37 entities
+- 426 bank-quarter observations
 
-Under parent-level clustering in the flagship sample, coefficients retain sign and magnitude but lose conventional significance. These results should be described as directional evidence rather than a settled causal estimate.
+**Universe C: treatment-definable SLR sample**
+- 20 entities
+- 233 bank-quarter observations
+- Requires a usable 2019Q4 baseline for treatment assignment
+
+**Universe D: primary causal core**
+- 35 balanced-coverage entities
+- 420 balanced bank-quarter observations
+- The treatment-defined Treasury estimable cores inside Universe D still use 19 entities / 228 observations
+- Low-headroom Treasury result: -0.15pp (p = 0.813)
+- Covered-bank / direct-eligibility Treasury result: +0.40pp (p = 0.570)
+
+**Universe F: flagship per-parent clustered inference (16 parent clusters)**
+- 16 entities
+- 192 bank-quarter observations
+- Low headroom: -0.59pp (p = 0.690)
+- Covered bank / direct eligibility: -0.23pp (p = 0.911)
+
+Under parent-level clustering, neither Treasury split shows a reliable positive effect. The broader direct-eligibility treatment is still the cleaner regulatory split, but the current evidence is inconclusive rather than supportive.
+
+The diagnostics are cleaner than the coefficient signal. In Universe D, the Treasury pre-trend joint p-values are 0.826 for the low-headroom split and 0.933 for the covered-bank split; in the clustered flagship sample they are 0.163 and 0.266. The three-placebo grid is also quiet for both Treasury rows, with covered-bank placebo p-values of 0.492, 0.364, and 0.293. But the leave-one-parent-out ranges still cross zero for both treatments, so the right public framing is that the map-backed direct-treatment design is cleaner while the Treasury effect itself is currently weak.
 
 ## Mechanism evidence
 
-Five extension reports support the core result with a consistent mechanism story:
+Five extension reports still help characterize how balance-sheet pressure reallocates activity, even though the broadened direct-treatment Treasury signal is weak:
 
 - **Reallocation, not expansion.** Constrained banks shifted balance-sheet capacity toward Treasuries while reducing deposits and loans. Low-headroom banks: Treasury +2.47pp, deposit growth -3.52pp, loan growth -1.65pp.
-- **Safe-asset composition shift.** The response was within safe assets, not just between safe and risky. Covered banks shifted their safe-asset mix toward Treasuries by +9.86pp relative to controls.
-- **Family-level transmission.** Bank and parent Treasury-share changes moved in the same direction in 75% of linked quarter-over-quarter comparisons across 15 parent families.
-- **Trading-balance-sheet tradeoff.** Constrained banks reduced trading-asset share while Treasury holdings rose, consistent with leverage-capacity reallocation.
+- **Safe-asset composition shift.** The strongest safe-asset reallocation is in the low-headroom split: Treasury share of safe assets rises by +9.11pp relative to controls, while the covered-bank / direct-eligibility split is roughly flat to slightly negative.
+- **Family-level transmission.** Bank and parent Treasury-share changes moved in the same direction in 73.3% of linked quarter-over-quarter comparisons across 16 parent families.
+- **Trading-balance-sheet tradeoff.** Low-headroom banks reduced trading-asset share by 1.71pp while Treasury holdings rose by 2.47pp, consistent with leverage-capacity reallocation.
 - **Policy-regime context.** A longer quarterly panel (2019-2026) places the 2020 event within a broader safe-asset absorption story across pre-exclusion, exclusion, post-exclusion, and QT-era regimes.
 
 ## Constraint decomposition
@@ -92,6 +112,8 @@ python -m slr_watch.cli stage-fry9c --quarter 2025Q4 --input data/raw/fry9c/2025
 
 # Build panels
 python -m slr_watch.cli build-crosswalk
+python -m slr_watch.cli build-fdic-institutions
+python -m slr_watch.cli build-all-insured-panel
 python -m slr_watch.cli build-insured-panel
 python -m slr_watch.cli build-parent-panel
 
@@ -103,7 +125,12 @@ python -m slr_watch.cli run-parent-transmission-report
 python -m slr_watch.cli run-treasury-intermediation-report
 python -m slr_watch.cli run-policy-regime-panel-report
 python -m slr_watch.cli run-constraint-decomposition-report
+python -m slr_watch.cli build-site-data
 ```
+
+The event-study pipeline now writes `output/reports/event_2020/sample_manifest.csv`, `sample_ladder.csv`, `treatment_roster.csv`, `methodology_memo.md`, and `gpt_pro_next_steps_prompt.md` so the exact descriptive universe, causal sample ladder, treatment-map classification, exclusion reasons, and next-question handoff are explicit.
+
+If you need to inspect which banks sit in the current 19-bank Treasury core or the 16-bank clustered flagship sample, use `output/reports/event_2020/treatment_roster.csv`; the site keeps that roster in a collapsed audit note instead of putting another visible table in the main narrative.
 
 See `python -m slr_watch.cli --help` for the full command set.
 

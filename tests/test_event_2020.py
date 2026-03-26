@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from slr_watch.analytics.event_2020 import run_event_2020, select_flagship_per_parent
+from slr_watch.analytics.event_2020 import add_treatments, run_event_2020, select_flagship_per_parent
+from slr_watch.analytics.event_study import EventStudySpec, event_study_terms
 
 
 def test_select_flagship_per_parent_prefers_largest_baseline_bank():
@@ -49,17 +50,42 @@ def test_select_flagship_per_parent_prefers_largest_baseline_bank():
 def test_run_event_2020_smoke(tmp_path: Path):
     quarters = pd.date_range("2019-03-31", "2021-12-31", freq="QE-DEC")
     rows = []
+    treatment_map_rows = []
     for entity_num in range(6):
         entity_id = f"bank_{entity_num}"
+        rssd_id = f"{1000 + entity_num}"
+        treatment_map_rows.append(
+            {
+                "rssd_id": rssd_id,
+                "entity_id": entity_id,
+                "entity_name": f"Bank {entity_num}",
+                "fdic_cert": f"{9000 + entity_num}",
+                "top_parent_rssd_2019q4": f"parent_{entity_num // 2}",
+                "top_parent_name_2019q4": f"Parent {entity_num // 2}",
+                "slr_reporting_2019q4": True,
+                "eslr_covered_6pct": entity_num % 2 == 0,
+                "di_relief_eligible_2020": entity_num % 2 == 1,
+                "di_relief_elected_2020": pd.NA if entity_num % 3 else True,
+                "parent_hc_relief_scope_2020": entity_num % 2 == 1,
+                "treatment_scope_2020": "synthetic",
+                "classification_source": "test_treatment_map",
+                "provenance_notes": "synthetic test map",
+            }
+        )
         for idx, quarter_end in enumerate(quarters):
             rows.append(
                 {
                     "entity_id": entity_id,
+                    "rssd_id": rssd_id,
+                    "entity_name": f"Bank {entity_num}",
                     "top_parent_rssd": f"parent_{entity_num // 2}",
                     "quarter_end": quarter_end.strftime("%Y-%m-%d"),
+                    "tier1_capital": 55.0 + entity_num,
+                    "total_leverage_exposure": 1000.0 + (20 * entity_num),
                     "headroom_pp": 0.01 + (entity_num * 0.002),
                     "ust_share_assets": 0.02 + (entity_num * 0.003),
                     "is_covered_bank_subsidiary": entity_num % 2 == 0,
+                    "di_relief_eligible_2020": entity_num % 2 == 1,
                     "total_assets": 1000 + (entity_num * 100),
                     "ust_inventory_fv": 50 + idx + entity_num,
                     "balances_due_from_fed": 80 + idx,
@@ -71,6 +97,9 @@ def test_run_event_2020_smoke(tmp_path: Path):
             )
 
     panel = pd.DataFrame(rows)
+    treatment_map = pd.DataFrame(treatment_map_rows)
+    treatment_map_path = tmp_path / "insured_bank_treatment_map_2020.csv"
+    treatment_map.to_csv(treatment_map_path, index=False)
     panel_path = tmp_path / "insured_bank_panel.parquet"
     panel.to_parquet(panel_path, index=False)
     market_panel = pd.DataFrame(
@@ -86,12 +115,36 @@ def test_run_event_2020_smoke(tmp_path: Path):
     market_dir.mkdir()
     (market_dir / "summary.md").write_text("# Treasury Market Context\n", encoding="utf-8")
 
-    output_dir = run_event_2020(panel_path, output_dir=tmp_path / "event_2020", market_panel_path=market_panel_path)
+    output_dir = run_event_2020(
+        panel_path,
+        output_dir=tmp_path / "event_2020",
+        market_panel_path=market_panel_path,
+        treatment_map_path=treatment_map_path,
+    )
 
     assert (output_dir / "prepared_panel.csv").exists()
     assert (output_dir / "did_results.csv").exists()
+    assert (output_dir / "sample_manifest.csv").exists()
+    assert (output_dir / "sample_manifest.md").exists()
+    assert (output_dir / "sample_ladder.csv").exists()
+    assert (output_dir / "sample_ladder.md").exists()
+    assert (output_dir / "methodology_memo.md").exists()
+    assert (output_dir / "gpt_pro_next_steps_prompt.md").exists()
+    assert (output_dir / "pretrend_checks.csv").exists()
+    assert (output_dir / "pretrend_checks.md").exists()
+    assert (output_dir / "expanded_sensitivity" / "prepared_panel.csv").exists()
+    assert (output_dir / "historical_unbalanced" / "prepared_panel.csv").exists()
     assert (output_dir / "flagship_per_parent" / "prepared_panel.csv").exists()
     assert (output_dir / "flagship_per_parent_clustered" / "prepared_panel.csv").exists()
+    assert (output_dir / "flagship_per_parent_clustered" / "pretrend_checks.csv").exists()
+    assert (output_dir / "flagship_per_parent_clustered" / "pretrend_checks.md").exists()
+    assert (output_dir / "flagship_per_parent_clustered" / "placebo_fake_date.csv").exists()
+    assert (output_dir / "flagship_per_parent_clustered" / "placebo_fake_date.md").exists()
+    assert (output_dir / "flagship_per_parent_clustered" / "leave_one_parent_out.csv").exists()
+    assert (output_dir / "flagship_per_parent_clustered" / "leave_one_parent_out.md").exists()
+    assert (output_dir / "flagship_per_parent_expanded" / "prepared_panel.csv").exists()
+    assert (output_dir / "flagship_per_parent_expanded_clustered" / "prepared_panel.csv").exists()
+    assert (output_dir / "treatment_roster.csv").exists()
     assert (output_dir / "sample_comparison.md").exists()
     assert (output_dir / "market_control_sensitivity.md").exists()
     assert (output_dir / "market_interaction_sensitivity.md").exists()
@@ -99,13 +152,56 @@ def test_run_event_2020_smoke(tmp_path: Path):
     assert (output_dir / "market_aux_no_time_fe.md").exists()
     assert (output_dir / "market_aux_no_time_fe.csv").exists()
     did_results = pd.read_csv(output_dir / "did_results.csv")
+    historical_did_results = pd.read_csv(output_dir / "historical_unbalanced" / "did_results.csv")
     clustered_results = pd.read_csv(output_dir / "flagship_per_parent_clustered" / "did_results.csv")
     interaction_results = pd.read_csv(output_dir / "market_interaction_sensitivity.csv")
     aux_results = pd.read_csv(output_dir / "market_aux_no_time_fe.csv")
+    pretrend_clustered_results = pd.read_csv(output_dir / "flagship_per_parent_clustered" / "pretrend_checks.csv")
+    placebo_results = pd.read_csv(output_dir / "flagship_per_parent_clustered" / "placebo_fake_date.csv")
+    leave_one_out_results = pd.read_csv(output_dir / "flagship_per_parent_clustered" / "leave_one_parent_out.csv")
+    treatment_roster = pd.read_csv(output_dir / "treatment_roster.csv")
     assert not did_results.empty
+    assert not historical_did_results.empty
     assert not clustered_results.empty
     assert not interaction_results.empty
     assert not aux_results.empty
+    assert not pretrend_clustered_results.empty
+    assert not placebo_results.empty
+    assert not leave_one_out_results.empty
+    assert not treatment_roster.empty
+    assert placebo_results["placebo_grid_label"].nunique() == 3
+    assert set(treatment_roster.columns) >= {
+        "di_relief_eligible_2020",
+        "di_relief_elected_2020",
+        "classification_source",
+        "provenance_notes",
+        "included_universe_c",
+        "included_universe_d",
+        "included_universe_f_primary",
+    }
+    assert treatment_roster.loc[treatment_roster["entity_id"] == "bank_1", "di_relief_eligible_2020"].iloc[0] == True
+    manifest = pd.read_csv(output_dir / "sample_manifest.csv")
+    synthetic_manifest = manifest[manifest["entity_id"].str.startswith("bank_")].copy()
+    assert synthetic_manifest["included_universe_b"].sum() == 6
+    assert synthetic_manifest["included_universe_c"].sum() == 6
+    assert synthetic_manifest["included_universe_d"].sum() == 6
+    assert synthetic_manifest["included_universe_f_primary"].sum() == 3
+    excluded_flagship = synthetic_manifest.loc[
+        ~synthetic_manifest["included_universe_f_primary"],
+        "universe_f_primary_exclusion_reason",
+    ].dropna()
+    assert set(excluded_flagship) == {"not_largest_2019q4_subsidiary_in_parent_family"}
+    ladder = pd.read_csv(output_dir / "sample_ladder.csv")
+    assert set(ladder["sample_name"]) >= {
+        "universe_a_all_insured_banks",
+        "universe_b_slr_reporting",
+        "universe_c_treatment_definable",
+        "universe_c_covered_bank_baseline",
+        "universe_d_primary_core",
+        "universe_d_covered_bank_primary",
+        "universe_e_expanded_sensitivity",
+        "universe_f_flagship_primary",
+    }
     assert set(clustered_results["cov_type"]) == {"cluster"}
     assert set(clustered_results["cluster_col"]) == {"top_parent_rssd"}
     assert set(interaction_results["cluster_col"]) == {"top_parent_rssd"}
@@ -119,3 +215,106 @@ def test_run_event_2020_smoke(tmp_path: Path):
     assert "treated_post × standardized_market_level" in interaction_note
     aux_note = (output_dir / "market_aux_no_time_fe.md").read_text(encoding="utf-8")
     assert "drops quarter fixed effects" in aux_note
+    manifest_note = (output_dir / "sample_manifest.md").read_text(encoding="utf-8")
+    assert "Event Study Sample Manifest" in manifest_note
+    assert "Universe D" in manifest_note
+    prompt_note = (output_dir / "gpt_pro_next_steps_prompt.md").read_text(encoding="utf-8")
+    assert "Stability across D/E/F" in prompt_note
+    assert "## Diagnostics" in prompt_note
+    assert "leave-one-parent-out" in prompt_note.lower()
+    assert "Verdict: `stop`, `stop with 1-2 fixes`, or `do not stop`" in prompt_note
+    pretrend_note = (output_dir / "pretrend_checks.md").read_text(encoding="utf-8")
+    pretrend_clustered_note = (output_dir / "flagship_per_parent_clustered" / "pretrend_checks.md").read_text(encoding="utf-8")
+    placebo_note = (output_dir / "flagship_per_parent_clustered" / "placebo_fake_date.md").read_text(encoding="utf-8")
+    leave_one_out_note = (output_dir / "flagship_per_parent_clustered" / "leave_one_parent_out.md").read_text(encoding="utf-8")
+    assert "Pre-Trend Checks" in pretrend_note
+    assert "parent-clustered" in pretrend_clustered_note
+    assert "Fake-Date Placebo" in placebo_note
+    assert "Leave-One-Parent-Out" in leave_one_out_note
+
+
+def test_add_treatments_freezes_terciles_on_assignment_frame():
+    full_rows = []
+    subset_rows = []
+    baseline_values = [
+        ("bank_1", 0.10, 0.10),
+        ("bank_2", 0.20, 0.20),
+        ("bank_3", 0.30, 0.30),
+        ("bank_4", 0.40, 0.40),
+    ]
+    for entity_id, headroom, ust_share in baseline_values:
+        row = {
+            "entity_id": entity_id,
+            "quarter_end": "2019-12-31",
+            "tier1_capital": 50.0,
+            "total_leverage_exposure": 1000.0,
+            "headroom_pp": headroom,
+            "ust_share_assets": ust_share,
+            "is_covered_bank_subsidiary": entity_id in {"bank_1", "bank_4"},
+        }
+        full_rows.append(row)
+        if entity_id != "bank_4":
+            subset_rows.append(row.copy())
+
+    full = pd.DataFrame(full_rows)
+    subset = pd.DataFrame(subset_rows)
+
+    frozen = add_treatments(subset, assignment_frame=full)
+    sample_relative = add_treatments(subset)
+
+    frozen_bank_3 = frozen.loc[frozen["entity_id"] == "bank_3", "high_ust_share_treated"].iloc[0]
+    sample_relative_bank_3 = sample_relative.loc[sample_relative["entity_id"] == "bank_3", "high_ust_share_treated"].iloc[0]
+
+    assert frozen_bank_3 == 0
+    assert sample_relative_bank_3 == 1
+
+
+def test_add_treatments_uses_di_relief_eligible_for_covered_bank():
+    rows = [
+        {
+            "entity_id": "bank_a",
+            "quarter_end": "2019-12-31",
+            "rssd_id": "1",
+            "tier1_capital": 50.0,
+            "total_leverage_exposure": 1000.0,
+            "headroom_pp": 0.10,
+            "ust_share_assets": 0.10,
+            "is_covered_bank_subsidiary": False,
+            "di_relief_eligible_2020": True,
+        },
+        {
+            "entity_id": "bank_b",
+            "quarter_end": "2019-12-31",
+            "rssd_id": "2",
+            "tier1_capital": 50.0,
+            "total_leverage_exposure": 1000.0,
+            "headroom_pp": 0.20,
+            "ust_share_assets": 0.20,
+            "is_covered_bank_subsidiary": True,
+            "di_relief_eligible_2020": False,
+        },
+        {
+            "entity_id": "bank_c",
+            "quarter_end": "2019-12-31",
+            "rssd_id": "3",
+            "tier1_capital": 50.0,
+            "total_leverage_exposure": 1000.0,
+            "headroom_pp": 0.30,
+            "ust_share_assets": 0.30,
+            "is_covered_bank_subsidiary": False,
+            "di_relief_eligible_2020": False,
+        },
+    ]
+    frame = pd.DataFrame(rows)
+    treated = add_treatments(frame)
+    assert treated.loc[treated["entity_id"] == "bank_a", "covered_bank_treated"].iloc[0] == 1
+    assert treated.loc[treated["entity_id"] == "bank_b", "covered_bank_treated"].iloc[0] == 0
+
+
+def test_event_study_spec_omits_reference_period_minus_two():
+    spec = EventStudySpec(outcome="ust_inventory_fv_scaled", treatment="covered_bank_treated")
+    terms = event_study_terms(spec)
+
+    assert "event_m2" not in terms
+    assert "event_m1" in terms
+    assert "event_p0" in terms

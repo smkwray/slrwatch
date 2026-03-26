@@ -58,37 +58,39 @@
   <div class="container">
     <div class="highlights reveal">
       <div class="highlight-card">
-        <div class="stat positive">+2.47pp</div>
-        <div class="stat-label">Treasury Inventory Increase</div>
+        <div class="stat neutral">35</div>
+        <div class="stat-label">Balanced-Core Banks</div>
         <div class="stat-desc">
-          Low-headroom banks increased Treasury holdings relative to controls
-          after the 2020 temporary SLR exclusion (broad sample, p&nbsp;=&nbsp;0.002).
+          The map-backed balanced coverage core now includes 35 fully
+          balanced SLR-reporting banks, while the treatment-defined Treasury
+          rows inside it still estimate on a 19-bank 2019Q4-baseline subset.
         </div>
       </div>
       <div class="highlight-card">
-        <div class="stat positive">+9.86pp</div>
-        <div class="stat-label">Safe-Asset Composition Shift</div>
+        <div class="stat positive">+9.11pp</div>
+        <div class="stat-label">Low-Headroom Safe-Asset Shift</div>
         <div class="stat-desc">
-          Covered-bank subsidiaries shifted their safe-asset mix toward
-          Treasuries rather than Fed reserve balances.
+          Low-headroom banks shifted their safe-asset mix toward Treasuries
+          rather than Fed reserve balances.
         </div>
       </div>
       <div class="highlight-card">
-        <div class="stat neutral">75%</div>
+        <div class="stat neutral">73.3%</div>
         <div class="stat-label">Family Co-Movement</div>
         <div class="stat-desc">
           Bank and parent Treasury-share changes moved in the same direction
-          in three-quarters of linked quarter-over-quarter comparisons.
+          in the linked quarter-over-quarter sample.
         </div>
       </div>
     </div>
 
     <div class="caveat reveal" style="margin-top:32px">
       <strong>Inference note.</strong> Under parent-level clustering in the
-      flagship sample (15 clusters), the headline Treasury coefficients
-      retain their sign and approximate magnitude but lose conventional
-      significance (p&nbsp;&asymp;&nbsp;0.17). The right language is
-      <em>directional evidence</em>, not a settled causal estimate.
+      map-backed flagship sample (16 clusters), the Treasury coefficients are
+      weak and unstable (low headroom &minus;0.59pp, p&nbsp;=&nbsp;0.690;
+      covered-bank / direct eligibility &minus;0.23pp, p&nbsp;=&nbsp;0.911).
+      The placebo grid is quiet, but the current causal read is
+      <em>inconclusive</em>, not positive proof.
     </div>
   </div>
 </section>
@@ -102,10 +104,10 @@
       <p class="label">Core Results</p>
       <h2>Event-Study Findings</h2>
       <p class="lead">
-        The flagship design compares balance-sheet-constrained banks to
-        less-constrained peers around the April&nbsp;2020 temporary SLR exclusion.
-        Constrained banks&mdash;especially covered-bank subsidiaries&mdash;appear
-        to have increased Treasury holdings more than comparison banks.
+        The flagship design now compares a map-backed direct-treatment roster
+        to comparison banks around the 2020 temporary SLR exclusion window.
+        After broadening the direct-treatment population, the Treasury signal
+        is currently small and imprecise rather than robustly positive.
       </p>
     </div>
 
@@ -113,21 +115,21 @@
     <div class="chart-wrapper reveal">
       <div class="chart-title">Coefficient Comparison: Treasury Inventory / Assets</div>
       <div class="chart-subtitle">
-        DiD coefficient across three sample/specification variants &middot; Outcome: Treasury inventory scaled by total assets
+        DiD coefficient across the primary core, expanded sensitivity, and clustered flagship variants &middot; Outcome: Treasury inventory scaled by total assets
       </div>
       <div class="chart-container" id="chart-dot-plot"></div>
       <div class="chart-legend">
         <div class="chart-legend-item">
           <div class="chart-legend-dot" style="background:var(--chart-1)"></div>
-          Broad sample (HC1)
+          Primary core (Universe D)
         </div>
         <div class="chart-legend-item">
           <div class="chart-legend-dot" style="background:var(--chart-2)"></div>
-          Flagship per-parent (HC1)
+          Expanded sensitivity (Universe E)
         </div>
         <div class="chart-legend-item">
           <div class="chart-legend-dot" style="background:var(--chart-3);opacity:0.5;border:2px solid var(--chart-3)"></div>
-          Flagship clustered (parent)
+          Flagship clustered (Universe F)
         </div>
         <div class="chart-legend-item" style="margin-left:12px;color:var(--text-tertiary)">
           Filled = p &lt; 0.05 &nbsp;|&nbsp; Hollow = p &ge; 0.05
@@ -139,19 +141,21 @@
       <div class="card">
         <h4>What holds up</h4>
         <p>
-          The <code>low_headroom_treated</code> and
-          <code>covered_bank_treated</code> coefficients are positive and
-          economically meaningful across all three sample variants. In the
-          broad sample, both are significant at the 1% level.
+          The sample architecture is clearer: 5,488 insured-bank filers in the
+          descriptive layer, 37 SLR reporters, a 35-bank balanced coverage core,
+          and a committed treatment roster. The covered-bank / direct-eligibility
+          split remains the cleaner regulatory treatment, and its pretrend and
+          placebo diagnostics are comparatively quiet.
         </p>
       </div>
       <div class="card">
         <h4>What does not</h4>
         <p>
-          The <code>high_ust_share_treated</code> coefficient is near zero
-          and insignificant everywhere. The flagship-clustered results lose
-          conventional significance, so the headline should be framed as
-          suggestive rather than definitive.
+          The Treasury response no longer survives the broadened treatment map.
+          In the treatment-defined Treasury core, low headroom is &minus;0.15pp
+          (p&nbsp;=&nbsp;0.813) and covered bank / direct eligibility is +0.40pp
+          (p&nbsp;=&nbsp;0.570); both clustered flagship variants are weaker still,
+          and leave-one-parent-out ranges cross zero for both splits.
         </p>
       </div>
     </div>
@@ -159,19 +163,35 @@
     <!-- Sample details -->
     <div class="stat-grid reveal" style="margin-top:32px">
       <div class="stat-item">
-        <div class="stat-value">232</div>
-        <div class="stat-label">Broad sample observations</div>
+        <div class="stat-value" id="descriptive-universe-obs">61626</div>
+        <div class="stat-label">Descriptive-universe observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">21</div>
-        <div class="stat-label">Distinct entities (broad)</div>
+        <div class="stat-value" id="descriptive-universe-entities">5488</div>
+        <div class="stat-label">Descriptive-universe entities</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">180</div>
+        <div class="stat-value" id="slr-reporting-obs">426</div>
+        <div class="stat-label">Universe B observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="slr-reporting-entities">37</div>
+        <div class="stat-label">Universe B entities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="primary-core-obs">420</div>
+        <div class="stat-label">Universe D observations</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="primary-core-entities">35</div>
+        <div class="stat-label">Universe D entities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="flagship-obs">192</div>
         <div class="stat-label">Flagship sample observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">15</div>
+        <div class="stat-value" id="flagship-clusters">16</div>
         <div class="stat-label">Parent clusters (flagship)</div>
       </div>
     </div>
@@ -187,7 +207,7 @@
       <p class="label">Research Design</p>
       <h2>Method</h2>
       <p class="lead">
-        A panel event study around the April&nbsp;2020 temporary SLR exclusion,
+        A panel event study around the 2020 temporary SLR exclusion window,
         using difference-in-differences with entity and time fixed effects.
       </p>
     </div>
@@ -218,11 +238,10 @@
     <div class="subsection reveal">
       <h3>The 2020 Natural Experiment</h3>
       <p>
-        On April&nbsp;1, 2020, the Federal Reserve temporarily excluded U.S. Treasury
-        securities and deposits at Federal Reserve Banks from the SLR denominator
-        for holding companies. The exclusion expired on March&nbsp;31, 2021. This
-        created a clean before/during/after window for estimating how leverage-ratio
-        relief affects bank Treasury demand.
+        The repo treats 2020&ndash;Q2 as the first treated Call Report quarter in
+        the temporary SLR exclusion window. April&nbsp;1, 2020 marks the
+        holding-company rule, and June&nbsp;2020 is the first insured-bank Call
+        Report quarter that can reflect direct depository-institution relief.
       </p>
       <p>
         The event window runs from 2019&ndash;Q1 through 2021&ndash;Q4, with
@@ -239,13 +258,21 @@
         <div class="step-content">
           <h4>Sample Construction</h4>
           <p>
-            The universe covers U.S. GSIB parents, major insured-bank subsidiaries,
-            large non-GSIB controls, and U.S. IHCs of foreign banking organizations.
-            The <strong>broad sample</strong> includes 21 entities (232 bank-quarter
-            observations). The <strong>flagship per-parent sample</strong> restricts
-            to the single largest insured subsidiary per parent family&mdash;15 entities,
-            15 parent clusters, 180 observations&mdash;to avoid double-counting families
-            with multiple large subsidiaries.
+            The repo now starts from the full insured-bank Call Report filing universe
+            in the staged FFIEC bulk data: 5,488 entities and 61,626 bank-quarter
+            observations in the 2019&ndash;Q1 to 2021&ndash;Q4 descriptive layer.
+            The causal sample is then narrowed explicitly: 37 SLR-reporting insured
+            banks in Universe&nbsp;B, 20 treatment-definable banks in Universe&nbsp;C
+            with a usable joint 2019&ndash;Q4 baseline,
+            35 fully balanced banks in the primary coverage core (Universe&nbsp;D),
+            19-bank treatment-defined Treasury cores inside Universe&nbsp;D, and
+            16 banks / 16 parent clusters in the flagship per-parent sample (Universe&nbsp;F).
+          </p>
+          <p>
+            The repo publishes a sample manifest, a sample ladder, a treatment
+            roster, and a methodology memo in the event-study outputs so the exact
+            included entities, direct-treatment classifications, and exclusion
+            reasons are visible rather than implied by aggregate counts.
           </p>
         </div>
       </div>
@@ -259,11 +286,13 @@
           </p>
           <ul style="margin-top:8px;padding-left:20px;list-style:disc">
             <li><strong>Low SLR headroom</strong> &mdash; banks whose pre-shock headroom
-              (actual SLR minus required SLR) fell in the bottom tercile of the sample. These banks
-              had the most to gain from the exclusion.</li>
-            <li><strong>Covered-bank subsidiary</strong> &mdash; insured depositories
-              subject to the 6% well-capitalized threshold, versus non-covered peers
-              facing only the 3% minimum. This captures the regulatory intensity channel.</li>
+              (actual SLR minus required SLR) fell in the bottom tercile of the sample.
+              This is now treated as a heterogeneity split rather than the headline
+              regulatory treatment.</li>
+            <li><strong>Covered bank / direct eligibility</strong> &mdash; the compatibility
+              label remains <code>covered_bank_treated</code>, but the source of truth is
+              now a committed 2020 direct-relief map rather than the older covered-bank seed
+              alone. This is the cleaner regulatory-treatment margin.</li>
             <li><strong>High pre-shock Treasury share</strong> &mdash; banks in the top tercile of
               Treasury inventory as a share of assets. This arm tests whether banks already
               holding more Treasuries responded differently; it does not produce a robust result.</li>
@@ -326,12 +355,14 @@
     </div>
 
     <div class="caveat reveal">
-      <strong>Clustered-inference caveat.</strong> With 15 parent clusters in the
+      <strong>Clustered-inference caveat.</strong> With 16 parent clusters in the
       flagship sample, asymptotic cluster-robust variance estimates are known to
       over-reject. The repo reports both HC1 and parent-clustered standard errors;
       readers should weight the clustered column as the conservative bound. The
-      headline coefficients retain their sign and approximate magnitude under
-      clustering, but p-values rise from &lt;&nbsp;0.01 to roughly 0.17.
+      clustered pretrend checks are quieter than the point estimates, and the
+      placebo grid is null across all three Treasury windows, but the clustered
+      Treasury coefficients themselves are weak and leave-one-parent-out ranges
+      cross zero for both low-headroom and covered-bank splits.
     </div>
   </div>
 </section>
@@ -385,10 +416,10 @@
             </tr>
             <tr>
               <td>Covered Bank</td>
-              <td class="heatmap-cell-pos-strong">+1.97pp</td>
-              <td class="heatmap-cell-neg-light">&minus;0.45pp</td>
-              <td class="heatmap-cell-neg-strong">&minus;3.98pp</td>
-              <td class="heatmap-cell-neg-light">&minus;2.32pp</td>
+              <td class="heatmap-cell-pos-light">+0.68pp</td>
+              <td class="heatmap-cell-pos-light">+0.66pp</td>
+              <td class="heatmap-cell-neg-strong">&minus;3.93pp</td>
+              <td class="heatmap-cell-neg-light">&minus;2.11pp</td>
             </tr>
           </tbody>
         </table>
@@ -400,8 +431,10 @@
       <h3>Safe-Asset Composition</h3>
       <p>
         The main difference is composition <em>within</em> safe assets, not just
-        the level of Fed balances. Constrained banks shifted the safe-asset mix
-        toward Treasuries by roughly 9&ndash;10 percentage points more than controls.
+        the level of Fed balances. That compositional shift is concentrated in the
+        low-headroom split, where Treasury share of safe assets rises by about
+        9.1 percentage points more than controls. The covered-bank / direct-eligibility
+        split is much flatter.
       </p>
       <div class="chart-wrapper">
         <div class="chart-title">Safe-Asset Reallocation</div>
@@ -430,8 +463,8 @@
     <div class="subsection reveal">
       <h3>Treasury Intermediation Tradeoff</h3>
       <p>
-        Constrained banks reduced trading-balance-sheet use while absorbing more
-        Treasuries. The strongest market linkages are between treated-minus-control
+        Low-headroom banks reduced trading-balance-sheet use while absorbing more
+        Treasuries. The strongest market linkages remain between treated-minus-control
         trading-assets gaps and NY Fed dealer-position context (correlation up to 0.82).
       </p>
       <div class="chart-wrapper">
@@ -454,8 +487,8 @@
       <h3>Parent&ndash;Bank Transmission</h3>
       <p>
         The insured-bank Treasury result sits inside broader family-level
-        balance-sheet behavior. Linked-family analysis covers 100 bank-parent
-        quarter observations across 15 parent families.
+        balance-sheet behavior. Linked-family analysis now covers 407 bank-parent
+        quarter observations across 16 parent families.
       </p>
       <div class="grid-2">
         <div class="chart-wrapper">
@@ -581,27 +614,27 @@
 
     <div class="stat-grid reveal" style="margin-top:32px;margin-bottom:32px">
       <div class="stat-item">
-        <div class="stat-value">65.9%</div>
+        <div class="stat-value" id="constraint-insured-duration">65.9%</div>
         <div class="stat-label">Banks: duration-loss dominant in 2022&ndash;2023</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">63.0%</div>
+        <div class="stat-value" id="constraint-parent-duration">63.0%</div>
         <div class="stat-label">Parents: duration-loss dominant in 2022&ndash;2023</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">539</div>
+        <div class="stat-value" id="constraint-insured-obs">539</div>
         <div class="stat-label">Insured-bank observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">393</div>
+        <div class="stat-value" id="constraint-parent-obs">393</div>
         <div class="stat-label">Parent / IHC observations</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">64.8%</div>
+        <div class="stat-value" id="constraint-family-match">64.8%</div>
         <div class="stat-label">Linked families match in 2022&ndash;2023</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">48.6%</div>
+        <div class="stat-value" id="constraint-family-both-duration">48.6%</div>
         <div class="stat-label">Both bank and parent duration-loss dominated</div>
       </div>
     </div>
@@ -823,7 +856,9 @@
           <h4>2020 Event Study</h4>
           <p>
             Core DiD estimates and event-time coefficients for the temporary exclusion
-            window. Includes broad, flagship, and flagship-clustered variants.
+            window. Includes the explicit A&ndash;F sample ladder, primary vs expanded
+            causal variants, flagship clustered inference, the treatment roster,
+            placebo grid, and a GPT Pro handoff prompt.
           </p>
         </div>
       </div>
@@ -899,6 +934,32 @@
         </div>
       </div>
     </div>
+
+    <details class="reveal" style="margin-top:24px;padding:14px 18px;border:1px solid var(--border);border-radius:10px;background:var(--surface-secondary)">
+      <summary style="cursor:pointer;font-weight:600;color:var(--text-secondary)">Headline-bank roster</summary>
+      <p class="small" style="margin-top:12px">
+        The Treasury headline currently estimates on a
+        <span id="headline-core-count">19</span>-bank 2019Q4-baseline core.
+        The stricter clustered flagship keeps one bank per parent and uses
+        <span id="headline-flagship-count">16</span> banks.
+      </p>
+      <p class="small" style="margin-top:10px">
+        <strong>19-bank Treasury core:</strong>
+        <span id="headline-core-roster">American Express National Bank; BANK OF AMERICA, NATIONAL ASSOCIATION; BANK OF NEW YORK MELLON, THE; CAPITAL ONE BANK (USA), NATIONAL ASSOCIATION; CAPITAL ONE, NATIONAL ASSOCIATION; CHARLES SCHWAB BANK, SSB; CITIBANK, N.A.; Charles Schwab Premier Bank, SSB; Charles Schwab Trust Bank; GOLDMAN SACHS BANK USA; HSBC BANK USA, NATIONAL ASSOCIATION; JPMORGAN CHASE BANK, NATIONAL ASSOCIATION; MORGAN STANLEY BANK, N.A.; NORTHERN TRUST COMPANY, THE; PNC BANK, NATIONAL ASSOCIATION; STATE STREET BANK AND TRUST COMPANY; TD BANK, NATIONAL ASSOCIATION; U.S. BANK NATIONAL ASSOCIATION; WELLS FARGO BANK, NATIONAL ASSOCIATION</span>
+      </p>
+      <p class="small" style="margin-top:10px">
+        <strong>16-bank clustered flagship:</strong>
+        <span id="headline-flagship-roster">American Express National Bank; BANK OF AMERICA, NATIONAL ASSOCIATION; BANK OF NEW YORK MELLON, THE; CAPITAL ONE, NATIONAL ASSOCIATION; CHARLES SCHWAB BANK, SSB; CITIBANK, N.A.; GOLDMAN SACHS BANK USA; HSBC BANK USA, NATIONAL ASSOCIATION; JPMORGAN CHASE BANK, NATIONAL ASSOCIATION; MORGAN STANLEY BANK, N.A.; NORTHERN TRUST COMPANY, THE; PNC BANK, NATIONAL ASSOCIATION; STATE STREET BANK AND TRUST COMPANY; TD BANK, NATIONAL ASSOCIATION; U.S. BANK NATIONAL ASSOCIATION; WELLS FARGO BANK, NATIONAL ASSOCIATION</span>
+      </p>
+      <p class="small" style="margin-top:10px">
+        The per-parent reduction drops duplicate-parent subsidiaries from the 19-bank core:
+        <span id="headline-flagship-dropped">CAPITAL ONE BANK (USA), NATIONAL ASSOCIATION; Charles Schwab Premier Bank, SSB; Charles Schwab Trust Bank</span>.
+      </p>
+      <p class="small" style="margin-top:10px">
+        Full inclusion flags and 2020 treatment-map fields remain in
+        <code id="headline-roster-artifact">output/reports/event_2020/treatment_roster.csv</code>.
+      </p>
+    </details>
   </div>
 </section>
 

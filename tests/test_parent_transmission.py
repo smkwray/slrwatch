@@ -92,6 +92,8 @@ def test_report_produces_outputs(synthetic_panels: tuple[Path, Path], tmp_path: 
     assert result == output_dir
     assert (output_dir / "linked_panel.csv").exists()
     assert (output_dir / "family_quarter_summary.csv").exists()
+    assert (output_dir / "coverage_manifest.csv").exists()
+    assert (output_dir / "coverage_manifest.md").exists()
     assert (output_dir / "summary.md").exists()
 
 
@@ -134,3 +136,13 @@ def test_summary_mentions_directional(synthetic_panels: tuple[Path, Path], tmp_p
 
     text = (output_dir / "summary.md").read_text(encoding="utf-8")
     assert "direction" in text.lower() or "co-movement" in text.lower()
+
+
+def test_coverage_manifest_has_linkage_flags(synthetic_panels: tuple[Path, Path], tmp_path: Path) -> None:
+    bank_path, parent_path = synthetic_panels
+    output_dir = tmp_path / "report"
+    run_parent_transmission_report(bank_path, parent_path, output_dir)
+
+    manifest = pd.read_csv(output_dir / "coverage_manifest.csv")
+    assert "included_linked_sample" in manifest.columns
+    assert manifest["included_linked_sample"].all()

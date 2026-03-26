@@ -1,27 +1,35 @@
 {
   "coverage": {
-    "linked_observations": 100,
-    "bank_subsidiaries": 20,
-    "parent_families": 15,
-    "quarters": 5,
-    "period": "2020-Q4 to 2021-Q4"
+    "linked_observations": 407,
+    "bank_subsidiaries": 21,
+    "parent_families": 16,
+    "quarters": 21,
+    "period": "2020-Q4 to 2025-Q4"
   },
   "co_movement": {
-    "ust_holdings": { "same_direction": 60, "total": 80, "pct": 75 },
-    "trading_assets": { "same_direction": 48, "total": 80, "pct": 60 }
+    "ust_holdings": {
+      "same_direction": 283,
+      "total": 386,
+      "pct": 73.3
+    },
+    "trading_assets": {
+      "same_direction": 231,
+      "total": 386,
+      "pct": 59.8
+    }
   },
   "surcharge_comparison": {
     "high_surcharge": {
-      "bank_ust_assets": 0.0926,
-      "bank_headroom_pp": 0.0087,
-      "parent_trading_assets": 0.1401,
-      "obs": 16
+      "bank_ust_assets": 0.09779898288237672,
+      "bank_headroom_pp": 0.014135034869163916,
+      "parent_trading_assets": 0.17968984756920986,
+      "obs": 80
     },
     "low_surcharge": {
-      "bank_ust_assets": 0.0936,
-      "bank_headroom_pp": 0.0190,
-      "parent_trading_assets": 0.1293,
-      "obs": 24
+      "bank_ust_assets": 0.09008269278054418,
+      "bank_headroom_pp": 0.021194633067842653,
+      "parent_trading_assets": 0.10716854849425307,
+      "obs": 88
     }
   }
 }

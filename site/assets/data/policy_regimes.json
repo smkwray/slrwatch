@@ -1,43 +1,63 @@
 {
   "regimes": [
-    { "name": "Pre-Exclusion", "id": "pre_exclusion", "period": "through 2020-Q1" },
-    { "name": "Temporary Exclusion", "id": "temporary_exclusion", "period": "2020-Q2 to 2021-Q1" },
-    { "name": "Post-Exclusion", "id": "post_exclusion", "period": "2021-Q2 to 2022-Q1" },
-    { "name": "QT Era", "id": "qt_era", "period": "2022-Q2 onward" }
+    {
+      "name": "Pre-Exclusion",
+      "id": "pre_exclusion",
+      "period": "through 2020-Q1"
+    },
+    {
+      "name": "Temporary Exclusion",
+      "id": "temporary_exclusion",
+      "period": "2020-Q2 to 2021-Q1"
+    },
+    {
+      "name": "Post-Exclusion",
+      "id": "post_exclusion_normalization",
+      "period": "2021-Q2 to 2022-Q1"
+    },
+    {
+      "name": "QT Era",
+      "id": "qt_era",
+      "period": "2022-Q2 onward"
+    }
   ],
   "metrics": [
     {
       "label": "Insured-Bank Treasury Share",
-      "pre_exclusion": 0.0615,
-      "temporary_exclusion": 0.0645,
-      "post_exclusion": null,
-      "qt_era": null
+      "pre_exclusion": 0.0615316953758757,
+      "temporary_exclusion": 0.0644835863626206,
+      "post_exclusion": 0.0745281548767148,
+      "qt_era": 0.076222255157981
     },
     {
       "label": "Insured-Bank Fed-Balance Share",
-      "pre_exclusion": 0.0775,
-      "temporary_exclusion": 0.1509,
-      "post_exclusion": null,
-      "qt_era": null
+      "pre_exclusion": 0.0775423855854803,
+      "temporary_exclusion": 0.1509442000479775,
+      "post_exclusion": 0.141626417744308,
+      "qt_era": 0.1119329089946013
     },
     {
       "label": "Parent Trading-Assets Share",
       "pre_exclusion": null,
-      "temporary_exclusion": 0.0966,
-      "post_exclusion": null,
-      "qt_era": 0.0903
+      "temporary_exclusion": 0.0966447558547242,
+      "post_exclusion": 0.0867829912949293,
+      "qt_era": 0.090267434637849
     }
   ],
   "market": [
     {
       "label": "NY Fed Dealer Net UST Position ($M)",
+      "pre_exclusion": 228587.2,
       "temporary_exclusion": 229416.5,
+      "post_exclusion": 131267.75,
       "qt_era": 303042.375
     },
     {
       "label": "TRACE Total Par Volume ($B)",
-      "temporary_exclusion": 36946.0,
-      "qt_era": 52632.4
+      "pre_exclusion": 41144.0,
+      "temporary_exclusion": 36945.975,
+      "post_exclusion": 41690.775,
+      "qt_era": 52632.4125
     }
   ]
 }

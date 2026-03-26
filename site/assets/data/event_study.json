@@ -1,36 +1,246 @@
 {
   "samples": {
-    "broad": { "observations": 232, "entities": 21 },
-    "flagship": { "observations": 180, "entities": 15 }
+    "descriptive_universe": {
+      "observations": 61626,
+      "entities": 5488
+    },
+    "slr_reporting": {
+      "observations": 426,
+      "entities": 37
+    },
+    "treatment_definable": {
+      "observations": 233,
+      "entities": 20
+    },
+    "primary_core": {
+      "observations": 420,
+      "entities": 35
+    },
+    "expanded_sensitivity": {
+      "observations": 420,
+      "entities": 35
+    },
+    "flagship_primary": {
+      "observations": 192,
+      "entities": 16,
+      "clusters": 16
+    }
   },
   "coefficients": [
     {
       "treatment": "Low Headroom",
       "outcome": "Treasury Inventory / Assets",
-      "broad": { "coef": 0.0247, "p": 0.0021 },
-      "flagship": { "coef": 0.0178, "p": 0.0515 },
-      "flagship_clustered": { "coef": 0.0178, "p": 0.1762 }
+      "primary": {
+        "coef": -0.0014702344878071,
+        "p": 0.8132801150380371
+      },
+      "expanded": {
+        "coef": -0.0014702344878071,
+        "p": 0.8132801150380371
+      },
+      "flagship_clustered": {
+        "coef": -0.0059468728087547,
+        "p": 0.6898684053666799
+      }
     },
     {
       "treatment": "Covered Bank",
       "outcome": "Treasury Inventory / Assets",
-      "broad": { "coef": 0.0197, "p": 0.0054 },
-      "flagship": { "coef": 0.0206, "p": 0.0055 },
-      "flagship_clustered": { "coef": 0.0206, "p": 0.1626 }
+      "primary": {
+        "coef": 0.0040096685996528,
+        "p": 0.5701460245654927
+      },
+      "expanded": {
+        "coef": 0.0040096685996528,
+        "p": 0.5701460245654927
+      },
+      "flagship_clustered": {
+        "coef": -0.0023304489250791,
+        "p": 0.91094689822281
+      }
     },
     {
       "treatment": "High UST Share",
       "outcome": "Treasury Inventory / Assets",
-      "broad": { "coef": 0.0023, "p": 0.8133 },
-      "flagship": { "coef": 0.0021, "p": 0.8348 },
-      "flagship_clustered": { "coef": 0.0021, "p": 0.9059 }
+      "primary": {
+        "coef": -0.0001901530239229,
+        "p": 0.980457506006339
+      },
+      "expanded": {
+        "coef": -0.0001901530239229,
+        "p": 0.980457506006339
+      },
+      "flagship_clustered": {
+        "coef": -0.0045095883580779,
+        "p": 0.7710018155189473
+      }
     },
     {
       "treatment": "High UST Share",
       "outcome": "Trading Assets / Assets",
-      "broad": { "coef": -0.0213, "p": 0.0137 },
-      "flagship": { "coef": -0.0214, "p": 0.0134 },
-      "flagship_clustered": { "coef": -0.0214, "p": 0.1717 }
+      "primary": {
+        "coef": -0.0133480266342045,
+        "p": 0.0354213448558133
+      },
+      "expanded": {
+        "coef": -0.0133480266342045,
+        "p": 0.0354213448558133
+      },
+      "flagship_clustered": {
+        "coef": -0.0134889133373392,
+        "p": 0.2660085301201852
+      }
     }
-  ]
+  ],
+  "diagnostics": {
+    "pretrend": {
+      "primary": [
+        {
+          "treatment": "low_headroom_treated",
+          "outcome": "ust_inventory_fv_scaled",
+          "p": 0.8264620485524637,
+          "max_abs_pre_coef": 0.0092270257512991
+        },
+        {
+          "treatment": "covered_bank_treated",
+          "outcome": "ust_inventory_fv_scaled",
+          "p": 0.933262658192823,
+          "max_abs_pre_coef": 0.0098663215165642
+        }
+      ],
+      "flagship_clustered": [
+        {
+          "treatment": "low_headroom_treated",
+          "outcome": "ust_inventory_fv_scaled",
+          "p": 0.1630172466544585,
+          "max_abs_pre_coef": 0.0146366964345071
+        },
+        {
+          "treatment": "covered_bank_treated",
+          "outcome": "ust_inventory_fv_scaled",
+          "p": 0.2661947080816964,
+          "max_abs_pre_coef": 0.006885540242387
+        }
+      ]
+    },
+    "placebo_grid": [
+      {
+        "label": "2019-07-01 to 2019-12-31",
+        "treatment": "low_headroom_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "coef": -0.007304629754561,
+        "p": 0.5910716956755078
+      },
+      {
+        "label": "2019-07-01 to 2019-12-31",
+        "treatment": "covered_bank_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "coef": 0.0081206892927377,
+        "p": 0.4916319059793964
+      },
+      {
+        "label": "2019-10-01 to 2019-12-31",
+        "treatment": "low_headroom_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "coef": -0.0094684226449308,
+        "p": 0.5589962335490584
+      },
+      {
+        "label": "2019-10-01 to 2019-12-31",
+        "treatment": "covered_bank_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "coef": 0.0122676834920316,
+        "p": 0.3639971328134675
+      },
+      {
+        "label": "2019-10-01 to 2020-03-31",
+        "treatment": "low_headroom_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "coef": -0.000815216424402,
+        "p": 0.9318533909512904
+      },
+      {
+        "label": "2019-10-01 to 2020-03-31",
+        "treatment": "covered_bank_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "coef": 0.0082403320912015,
+        "p": 0.2925673031578201
+      }
+    ],
+    "leave_one_parent_out": [
+      {
+        "treatment": "covered_bank_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "omitted_parents": 16,
+        "coef_min": -0.0171514837011374,
+        "coef_max": 0.0099230941200766,
+        "p_min": 0.332736452684042,
+        "p_max": 0.984336301706714
+      },
+      {
+        "treatment": "low_headroom_treated",
+        "outcome": "ust_inventory_fv_scaled",
+        "omitted_parents": 16,
+        "coef_min": -0.0134823368490135,
+        "coef_max": 5.495206159340013e-05,
+        "p_min": 0.3155748766437591,
+        "p_max": 0.9969725961276658
+      }
+    ]
+  },
+  "headline_rosters": {
+    "treasury_estimable_core": {
+      "entities": 19,
+      "banks": [
+        "American Express National Bank",
+        "BANK OF AMERICA, NATIONAL ASSOCIATION",
+        "BANK OF NEW YORK MELLON, THE",
+        "CAPITAL ONE BANK (USA), NATIONAL ASSOCIATION",
+        "CAPITAL ONE, NATIONAL ASSOCIATION",
+        "CHARLES SCHWAB BANK, SSB",
+        "CITIBANK, N.A.",
+        "Charles Schwab Premier Bank, SSB",
+        "Charles Schwab Trust Bank",
+        "GOLDMAN SACHS BANK USA",
+        "HSBC BANK USA, NATIONAL ASSOCIATION",
+        "JPMORGAN CHASE BANK, NATIONAL ASSOCIATION",
+        "MORGAN STANLEY BANK, N.A.",
+        "NORTHERN TRUST COMPANY, THE",
+        "PNC BANK, NATIONAL ASSOCIATION",
+        "STATE STREET BANK AND TRUST COMPANY",
+        "TD BANK, NATIONAL ASSOCIATION",
+        "U.S. BANK NATIONAL ASSOCIATION",
+        "WELLS FARGO BANK, NATIONAL ASSOCIATION"
+      ]
+    },
+    "flagship_clustered": {
+      "entities": 16,
+      "banks": [
+        "American Express National Bank",
+        "BANK OF AMERICA, NATIONAL ASSOCIATION",
+        "BANK OF NEW YORK MELLON, THE",
+        "CAPITAL ONE, NATIONAL ASSOCIATION",
+        "CHARLES SCHWAB BANK, SSB",
+        "CITIBANK, N.A.",
+        "GOLDMAN SACHS BANK USA",
+        "HSBC BANK USA, NATIONAL ASSOCIATION",
+        "JPMORGAN CHASE BANK, NATIONAL ASSOCIATION",
+        "MORGAN STANLEY BANK, N.A.",
+        "NORTHERN TRUST COMPANY, THE",
+        "PNC BANK, NATIONAL ASSOCIATION",
+        "STATE STREET BANK AND TRUST COMPANY",
+        "TD BANK, NATIONAL ASSOCIATION",
+        "U.S. BANK NATIONAL ASSOCIATION",
+        "WELLS FARGO BANK, NATIONAL ASSOCIATION"
+      ]
+    },
+    "dropped_from_flagship": [
+      "CAPITAL ONE BANK (USA), NATIONAL ASSOCIATION",
+      "Charles Schwab Premier Bank, SSB",
+      "Charles Schwab Trust Bank"
+    ],
+    "audit_artifact": "output/reports/event_2020/treatment_roster.csv",
+    "treatment_map_artifact": "data/reference/insured_bank_treatment_map_2020.csv",
+    "roster_version_count": 37
+  }
 }

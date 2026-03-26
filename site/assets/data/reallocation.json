@@ -1,14 +1,70 @@
 {
-  "treatments": ["Low Headroom", "Covered Bank"],
-  "outcomes": ["Treasury Inventory", "Fed Balances", "Deposit Growth", "Loan Growth"],
+  "treatments": [
+    "Low Headroom",
+    "Covered Bank"
+  ],
+  "outcomes": [
+    "Treasury Inventory",
+    "Fed Balances",
+    "Deposit Growth",
+    "Loan Growth"
+  ],
   "data": [
-    { "treatment": "Low Headroom", "outcome": "Treasury Inventory", "treated": 0.0285, "control": 0.0038, "net": 0.0247 },
-    { "treatment": "Low Headroom", "outcome": "Fed Balances", "treated": 0.0526, "control": 0.0500, "net": 0.0026 },
-    { "treatment": "Low Headroom", "outcome": "Deposit Growth", "treated": -0.0525, "control": -0.0173, "net": -0.0352 },
-    { "treatment": "Low Headroom", "outcome": "Loan Growth", "treated": -0.0399, "control": -0.0234, "net": -0.0165 },
-    { "treatment": "Covered Bank", "outcome": "Treasury Inventory", "treated": 0.0229, "control": 0.0032, "net": 0.0197 },
-    { "treatment": "Covered Bank", "outcome": "Fed Balances", "treated": 0.0487, "control": 0.0532, "net": -0.0045 },
-    { "treatment": "Covered Bank", "outcome": "Deposit Growth", "treated": -0.0504, "control": -0.0106, "net": -0.0398 },
-    { "treatment": "Covered Bank", "outcome": "Loan Growth", "treated": -0.0412, "control": -0.0180, "net": -0.0232 }
+    {
+      "treatment": "Covered Bank",
+      "outcome": "Deposit Growth",
+      "treated": -0.0427694038059703,
+      "control": -0.0034873316819008,
+      "net": -0.0392820721240695
+    },
+    {
+      "treatment": "Covered Bank",
+      "outcome": "Fed Balances",
+      "treated": 0.0530321265375275,
+      "control": 0.0463833609861228,
+      "net": 0.0066487655514046
+    },
+    {
+      "treatment": "Covered Bank",
+      "outcome": "Loan Growth",
+      "treated": -0.0361974510036508,
+      "control": -0.015138289676909,
+      "net": -0.0210591613267417
+    },
+    {
+      "treatment": "Covered Bank",
+      "outcome": "Treasury Inventory",
+      "treated": 0.0151724095873779,
+      "control": 0.0083461849415219,
+      "net": 0.006826224645856
+    },
+    {
+      "treatment": "Low Headroom",
+      "outcome": "Deposit Growth",
+      "treated": -0.0524914475943057,
+      "control": -0.0172951414709344,
+      "net": -0.0351963061233712
+    },
+    {
+      "treatment": "Low Headroom",
+      "outcome": "Fed Balances",
+      "treated": 0.0526078136206805,
+      "control": 0.0499623315119333,
+      "net": 0.0026454821087471
+    },
+    {
+      "treatment": "Low Headroom",
+      "outcome": "Loan Growth",
+      "treated": -0.0398980286504234,
+      "control": -0.0234475237522164,
+      "net": -0.016450504898207
+    },
+    {
+      "treatment": "Low Headroom",
+      "outcome": "Treasury Inventory",
+      "treated": 0.028488970476094,
+      "control": 0.0037693607312202,
+      "net": 0.0247196097448738
+    }
   ]
 }

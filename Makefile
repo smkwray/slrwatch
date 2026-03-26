@@ -1,4 +1,4 @@
-.PHONY: test demo sources plan crosswalk insured-panel parent-panel event-study reproduce
+.PHONY: test demo sources crosswalk fdic-institutions insured-panel all-insured-panel parent-panel event-study site-data reproduce
 
 PYTHON ?= python
 
@@ -11,14 +11,17 @@ demo:
 sources:
 	$(PYTHON) -m slr_watch.cli print-sources
 
-plan:
-	$(PYTHON) -m slr_watch.cli print-plan
-
 crosswalk:
 	$(PYTHON) -m slr_watch.cli build-crosswalk
 
+fdic-institutions:
+	$(PYTHON) -m slr_watch.cli build-fdic-institutions
+
 insured-panel:
 	$(PYTHON) -m slr_watch.cli build-insured-panel
+
+all-insured-panel:
+	$(PYTHON) -m slr_watch.cli build-all-insured-panel
 
 parent-panel:
 	$(PYTHON) -m slr_watch.cli build-parent-panel
@@ -26,8 +29,13 @@ parent-panel:
 event-study:
 	$(PYTHON) -m slr_watch.cli run-event-study
 
+site-data:
+	$(PYTHON) -m slr_watch.cli build-site-data
+
 reproduce:
 	$(PYTHON) -m slr_watch.cli build-crosswalk
+	$(PYTHON) -m slr_watch.cli build-fdic-institutions
+	$(PYTHON) -m slr_watch.cli build-all-insured-panel
 	$(PYTHON) -m slr_watch.cli build-insured-panel
 	$(PYTHON) -m slr_watch.cli build-parent-panel
 	$(PYTHON) -m slr_watch.cli run-event-study
@@ -37,3 +45,4 @@ reproduce:
 	$(PYTHON) -m slr_watch.cli run-treasury-intermediation-report
 	$(PYTHON) -m slr_watch.cli run-policy-regime-panel-report
 	$(PYTHON) -m slr_watch.cli run-constraint-decomposition-report
+	$(PYTHON) -m slr_watch.cli build-site-data
