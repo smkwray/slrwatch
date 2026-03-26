@@ -13,7 +13,7 @@ from .analytics.policy_regime_panel import run_policy_regime_panel_report
 from .analytics.reallocation_2020 import run_reallocation_report
 from .analytics.safe_asset_absorption import run_absorption_report
 from .analytics.treasury_intermediation import run_treasury_intermediation_report
-from .config import data_path, derived_data_path, raw_data_path, reference_data_path, reports_path, staging_data_path
+from .config import data_path, derived_data_path, raw_data_path, reference_data_path, repo_root, reports_path, staging_data_path
 from .ingest.call_reports import (
     download_call_report_bulk_zip,
     stage_call_report_folder,

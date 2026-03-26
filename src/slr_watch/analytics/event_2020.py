@@ -118,6 +118,19 @@ def _to_nullable_bool_series(series: pd.Series) -> pd.Series:
     return text.map(mapping).astype("boolean")
 
 
+def _numeric_column_or_na(frame: pd.DataFrame, column: str) -> pd.Series:
+    series = frame.get(column)
+    if series is None:
+        return pd.Series(pd.NA, index=frame.index, dtype="Float64")
+    return pd.to_numeric(series, errors="coerce")
+
+
+def _positive_numeric_or_true_if_missing(frame: pd.DataFrame, column: str) -> pd.Series:
+    if column not in frame.columns:
+        return pd.Series(True, index=frame.index, dtype="boolean")
+    return _numeric_column_or_na(frame, column).gt(0)
+
+
 def _load_treatment_map(treatment_map_path: Path | None = None) -> pd.DataFrame:
     source = treatment_map_path or DEFAULT_TREATMENT_MAP_PATH
     if not source.exists():
@@ -409,8 +422,8 @@ def _baseline_ready_entities(frame: pd.DataFrame) -> set[str]:
     if baseline.empty:
         return set()
     mask = (
-        pd.to_numeric(baseline.get("tier1_capital"), errors="coerce").gt(0)
-        & pd.to_numeric(baseline.get("total_leverage_exposure"), errors="coerce").gt(0)
+        _positive_numeric_or_true_if_missing(baseline, "tier1_capital")
+        & _positive_numeric_or_true_if_missing(baseline, "total_leverage_exposure")
     )
     for treatment in TREATMENTS:
         for column in treatment.baseline_columns:
@@ -432,8 +445,8 @@ def _baseline_ready_entities_for_treatment(frame: pd.DataFrame, treatment_name: 
         return set()
     treatment = TREATMENT_LOOKUP[treatment_name]
     mask = (
-        pd.to_numeric(baseline.get("tier1_capital"), errors="coerce").gt(0)
-        & pd.to_numeric(baseline.get("total_leverage_exposure"), errors="coerce").gt(0)
+        _positive_numeric_or_true_if_missing(baseline, "tier1_capital")
+        & _positive_numeric_or_true_if_missing(baseline, "total_leverage_exposure")
     )
     for column in treatment.baseline_columns:
         series = baseline.get(column)
@@ -541,8 +554,8 @@ def _build_sample_manifest(
             baseline["top_parent_name"] = baseline["fdic_top_parent_name"].astype("string").str.strip()
         else:
             baseline["top_parent_name"] = pd.NA
-        baseline["tier1_capital"] = pd.to_numeric(baseline.get("tier1_capital"), errors="coerce")
-        baseline["total_leverage_exposure"] = pd.to_numeric(baseline.get("total_leverage_exposure"), errors="coerce")
+        baseline["tier1_capital"] = _numeric_column_or_na(baseline, "tier1_capital")
+        baseline["total_leverage_exposure"] = _numeric_column_or_na(baseline, "total_leverage_exposure")
         if "is_covered_bank_subsidiary" not in baseline.columns:
             baseline["is_covered_bank_subsidiary"] = False
         baseline_summary = (
@@ -1873,8 +1886,8 @@ def run_event_2020(
     prepared = _event_window(prepare_event_2020_panel(panel))
     slr_reporting_entities = set(
         prepared.loc[
-            pd.to_numeric(prepared.get("tier1_capital"), errors="coerce").gt(0)
-            & pd.to_numeric(prepared.get("total_leverage_exposure"), errors="coerce").gt(0),
+            _numeric_column_or_na(prepared, "tier1_capital").gt(0)
+            & _numeric_column_or_na(prepared, "total_leverage_exposure").gt(0),
             "entity_id",
         ].astype(str)
     )
