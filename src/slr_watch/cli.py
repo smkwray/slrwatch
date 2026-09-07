@@ -77,9 +77,9 @@ def cmd_stage_call_reports(args: argparse.Namespace) -> int:
     if args.root:
         if quarter is None:
             raise ValueError("--quarter is required when staging from --root")
-        merged, normalized = stage_call_report_folder(Path(args.root), quarter=quarter, output_dir=output_dir)
+        identity, normalized = stage_call_report_folder(Path(args.root), quarter=quarter, output_dir=output_dir)
     elif args.zip_path:
-        merged, normalized = stage_call_report_zip(Path(args.zip_path), quarter=quarter, output_dir=output_dir)
+        identity, normalized = stage_call_report_zip(Path(args.zip_path), quarter=quarter, output_dir=output_dir)
     else:
         if quarter is None:
             raise ValueError("--quarter is required when staging from the default raw ZIP")
@@ -88,8 +88,8 @@ def cmd_stage_call_reports(args: argparse.Namespace) -> int:
             quarter.label,
             f"FFIEC-CDR-Call-Bulk-All-Schedules-{quarter.report_date_mmddyyyy_compact}.zip",
         )
-        merged, normalized = stage_call_report_zip(default_zip, quarter=quarter, output_dir=output_dir)
-    print(f"Wrote {merged}")
+        identity, normalized = stage_call_report_zip(default_zip, quarter=quarter, output_dir=output_dir)
+    print(f"Wrote {identity}")
     print(f"Wrote {normalized}")
     return 0
 
@@ -319,7 +319,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output")
     p.set_defaults(func=cmd_download_call_reports)
 
-    p = sub.add_parser("stage-call-reports", help="Extract, merge, and normalize one Call Report quarter")
+    p = sub.add_parser(
+        "stage-call-reports",
+        help="Temporarily extract and stage compact identity and normalized Call Report tables",
+    )
     p.add_argument("--quarter", help="Quarter like 2025Q4")
     p.add_argument("--zip-path")
     p.add_argument("--root")

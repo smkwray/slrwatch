@@ -6,6 +6,12 @@ import pandas as pd
 
 from .analytics.headroom_panel import enrich_with_headroom
 from .config import derived_data_path, reference_data_path
+from .ingest.call_reports import (
+    CALL_REPORT_IDENTITY_COLUMN_MAP,
+    CALL_REPORT_IDENTITY_FILENAME,
+    CALL_REPORT_MERGED_FILENAME,
+    CALL_REPORT_NORMALIZED_FILENAME,
+)
 from .ingest.fdic_institutions import build_fdic_institutions_reference
 from .pipeline import read_table, write_frame
 from .quarters import QuarterRef
@@ -20,15 +26,6 @@ PRE_TREATMENT_END = pd.Timestamp("2020-03-31")
 POST_TREATMENT_START = pd.Timestamp("2020-06-30")
 MIN_PRE_QUARTERS_EXPANDED = 3
 MIN_POST_QUARTERS_EXPANDED = 5
-
-MERGED_IDENTITY_COLUMNS = {
-    "RSSD9001": "rssd_id",
-    "RSSD9017": "entity_name_raw",
-    "RSSD9050": "fdic_cert_raw",
-    "RSSD9130": "hq_city",
-    "RSSD9200": "hq_state",
-    "RSSD9220": "hq_zip",
-}
 
 OVERRIDE_COLUMNS = [
     "rssd_id",
@@ -81,13 +78,25 @@ def _quarter_dirs(staged_path: Path) -> list[Path]:
         raise ValueError("Expected a staged Call Report root directory, not a single file")
     return sorted(
         path for path in staged_path.iterdir()
-        if path.is_dir() and (path / "call_reports_normalized.parquet").exists() and (path / "call_reports_merged.parquet").exists()
+        if path.is_dir()
+        and (path / CALL_REPORT_NORMALIZED_FILENAME).exists()
+        and (
+            (path / CALL_REPORT_IDENTITY_FILENAME).exists()
+            or (path / CALL_REPORT_MERGED_FILENAME).exists()
+        )
     )
 
 
 def _read_identity_frame(quarter_dir: Path) -> pd.DataFrame:
-    merged = pd.read_parquet(quarter_dir / "call_reports_merged.parquet", columns=list(MERGED_IDENTITY_COLUMNS))
-    identity = merged.rename(columns=MERGED_IDENTITY_COLUMNS).copy()
+    identity_path = quarter_dir / CALL_REPORT_IDENTITY_FILENAME
+    if identity_path.exists():
+        identity = pd.read_parquet(identity_path).copy()
+    else:
+        merged = pd.read_parquet(
+            quarter_dir / CALL_REPORT_MERGED_FILENAME,
+            columns=list(CALL_REPORT_IDENTITY_COLUMN_MAP),
+        )
+        identity = merged.rename(columns=CALL_REPORT_IDENTITY_COLUMN_MAP).copy()
     identity["rssd_id"] = identity["rssd_id"].astype("string").str.strip()
     for column in ["entity_name_raw", "fdic_cert_raw", "hq_city", "hq_state", "hq_zip"]:
         identity[column] = identity[column].astype("string").str.strip()
@@ -95,7 +104,7 @@ def _read_identity_frame(quarter_dir: Path) -> pd.DataFrame:
 
 
 def _read_normalized_frame(quarter_dir: Path) -> pd.DataFrame:
-    frame = pd.read_parquet(quarter_dir / "call_reports_normalized.parquet").copy()
+    frame = pd.read_parquet(quarter_dir / CALL_REPORT_NORMALIZED_FILENAME).copy()
     frame["rssd_id"] = frame["rssd_id"].astype("string").str.strip()
     frame["quarter_end"] = pd.to_datetime(frame["quarter_end"])
     return frame

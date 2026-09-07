@@ -212,8 +212,6 @@ def _enrich_with_treatment_map(frame: pd.DataFrame, *, treatment_map_path: Path 
 
 
 def _write_market_context_note(destination: Path) -> None:
-    market_dir = destination.parent / "market_context"
-    market_summary = market_dir / "summary.md"
     summary_path = destination / "summary.md"
     if not summary_path.exists():
         return
@@ -223,10 +221,10 @@ def _write_market_context_note(destination: Path) -> None:
         [
             "",
             "## Market Context",
-            f"- Related market-context report: `{market_summary}`" if market_summary.exists() else "- Related market-context report: not available",
-            f"- Related market-control note: `{destination / 'market_control_sensitivity.md'}`",
-            f"- Related market-interaction note: `{destination / 'market_interaction_sensitivity.md'}`",
-            f"- Related auxiliary no-time-FE note: `{destination / 'market_aux_no_time_fe.md'}`",
+            "- Related market-context report: `output/reports/market_context/summary.md`",
+            "- Related market-control note: `output/reports/event_2020/market_control_sensitivity.md`",
+            "- Related market-interaction note: `output/reports/event_2020/market_interaction_sensitivity.md`",
+            "- Related auxiliary no-time-FE note: `output/reports/event_2020/market_aux_no_time_fe.md`",
             "- NY Fed quarterly market overlays are useful narrative context for the broader Treasury environment.",
             "- Free public TRACE context now reaches back into the event-study window through FINRA's weekly archive, with newer quarters coming from the current monthly files.",
             "- Raw quarter-level market controls remain outside the baseline 2020 DiD because they are absorbed by quarter fixed effects.",
@@ -1269,8 +1267,8 @@ def _write_sample_comparison(
         [
             "",
             "## Transparency artifacts",
-            f"- Detailed sample manifest: `{output_path.parent / 'sample_manifest.csv'}`",
-            f"- Human-readable manifest summary: `{output_path.parent / 'sample_manifest.md'}`",
+            "- Detailed sample manifest: `output/reports/event_2020/sample_manifest.csv`",
+            "- Human-readable manifest summary: `output/reports/event_2020/sample_manifest.md`",
         ]
     )
 
@@ -1589,10 +1587,10 @@ def _write_methodology_memo(
     clustered_dir = output_path.parent / "flagship_per_parent_clustered"
     clustered_pretrend = clustered_dir / "pretrend_checks.csv"
     if clustered_pretrend.exists():
-        lines.append(f"- Flagship clustered pretrend checks: `{clustered_pretrend}`")
+        lines.append("- Flagship clustered pretrend checks: `output/reports/event_2020/flagship_per_parent_clustered/pretrend_checks.csv`")
     clustered_leave_one_out = clustered_dir / "leave_one_parent_out.csv"
     if clustered_leave_one_out.exists():
-        lines.append(f"- Flagship leave-one-parent-out summary: `{clustered_leave_one_out}`")
+        lines.append("- Flagship leave-one-parent-out summary: `output/reports/event_2020/flagship_per_parent_clustered/leave_one_parent_out.csv`")
     if not flagship_placebo.empty:
         lookup = flagship_placebo.set_index(["placebo_grid_label", "treatment", "outcome"])
         lines.append("## Placebo grid")
@@ -1610,130 +1608,6 @@ def _write_methodology_memo(
                     f"- `{placebo_grid_label}` covered-bank Treasury placebo coef={covered_row['coef']:.4f}, p={covered_row['pvalue']:.4f}"
                 )
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
-def _write_gpt_pro_prompt(
-    sample_ladder: pd.DataFrame,
-    sample_manifest: pd.DataFrame,
-    primary_did: pd.DataFrame,
-    expanded_did: pd.DataFrame,
-    flagship_clustered_did: pd.DataFrame,
-    primary_pretrend: pd.DataFrame,
-    flagship_clustered_pretrend: pd.DataFrame,
-    flagship_placebo: pd.DataFrame,
-    flagship_leave_one_out: pd.DataFrame,
-    output_path: Path,
-) -> None:
-    key_rows: list[str] = []
-    for label, frame in [
-        ("Universe D primary causal core", primary_did),
-        ("Universe E expanded sensitivity", expanded_did),
-        ("Universe F primary clustered", flagship_clustered_did),
-    ]:
-        lookup = frame.set_index(["treatment", "outcome"]) if not frame.empty else pd.DataFrame()
-        key_rows.append(
-            f"{label}: low_headroom_treated × ust_inventory_fv_scaled = {_coefficient_summary(lookup, 'low_headroom_treated', 'ust_inventory_fv_scaled')}; "
-            f"covered_bank_treated × ust_inventory_fv_scaled = {_coefficient_summary(lookup, 'covered_bank_treated', 'ust_inventory_fv_scaled')}"
-        )
-
-    prompt = [
-        "# GPT Pro Prompt",
-        "",
-        "Use the repo state below to perform a final external audit before commit/push.",
-        "",
-        "This is a stop/go review, not a brainstorming prompt.",
-        "Assume the team wants to stop iterating unless you identify a concrete blocker, overclaim, missing validation step, or a small high-leverage fix that should happen before commit.",
-        "",
-        "## Sample ladder",
-    ]
-    for _, row in sample_ladder.iterrows():
-        prompt.append(
-            f"- {row['sample_label']} ({row['sample_name']}): {row['entity_count']} entities, {row['observation_count']} observations, "
-            f"parents={row['parent_family_count']}, balanced={str(bool(row['balanced_panel'])).lower()}, rule={row['inclusion_rule']}, exclusions={row['exclusion_summary']}"
-        )
-    prompt.extend(
-        [
-            "",
-            "## Exclusion ledger",
-            f"- Universe B: {_format_reason_counts(sample_manifest['universe_b_exclusion_reason'])}",
-            f"- Universe C: {_format_reason_counts(sample_manifest['universe_c_exclusion_reason'])}",
-            f"- Universe D: {_format_reason_counts(sample_manifest['universe_d_exclusion_reason'])}",
-            f"- Universe F primary: {_format_reason_counts(sample_manifest['universe_f_primary_exclusion_reason'])}",
-            "",
-            "## Stability across D/E/F",
-            *[f"- {row}" for row in key_rows],
-        ]
-    )
-    prompt.extend(["", "## Diagnostics"])
-    if not primary_pretrend.empty:
-        lookup = primary_pretrend.set_index(["treatment", "outcome"])
-        prompt.extend(
-            [
-                f"- Universe D low_headroom_treated Treasury pretrend joint p={lookup.loc[('low_headroom_treated', 'ust_inventory_fv_scaled'), 'pretrend_joint_pvalue']:.4f}",
-                f"- Universe D covered_bank_treated Treasury pretrend joint p={lookup.loc[('covered_bank_treated', 'ust_inventory_fv_scaled'), 'pretrend_joint_pvalue']:.4f}",
-            ]
-        )
-    if not flagship_clustered_pretrend.empty:
-        lookup = flagship_clustered_pretrend.set_index(["treatment", "outcome"])
-        prompt.extend(
-            [
-                f"- Universe F clustered low_headroom_treated Treasury pretrend joint p={lookup.loc[('low_headroom_treated', 'ust_inventory_fv_scaled'), 'pretrend_joint_pvalue']:.4f}",
-                f"- Universe F clustered covered_bank_treated Treasury pretrend joint p={lookup.loc[('covered_bank_treated', 'ust_inventory_fv_scaled'), 'pretrend_joint_pvalue']:.4f}",
-            ]
-        )
-    if not flagship_placebo.empty:
-        lookup = flagship_placebo.set_index(["placebo_grid_label", "treatment", "outcome"])
-        prompt.append("- Universe F clustered fake-date placebo grid:")
-        for placebo_grid_label in flagship_placebo["placebo_grid_label"].dropna().astype(str).drop_duplicates():
-            low_key = (placebo_grid_label, "low_headroom_treated", "ust_inventory_fv_scaled")
-            covered_key = (placebo_grid_label, "covered_bank_treated", "ust_inventory_fv_scaled")
-            if low_key in lookup.index:
-                low_row = lookup.loc[low_key]
-                prompt.append(
-                    f"- `{placebo_grid_label}` low-headroom Treasury placebo coef={low_row['coef']:.4f}, p={low_row['pvalue']:.4f}"
-                )
-            if covered_key in lookup.index:
-                covered_row = lookup.loc[covered_key]
-                prompt.append(
-                    f"- `{placebo_grid_label}` covered-bank Treasury placebo coef={covered_row['coef']:.4f}, p={covered_row['pvalue']:.4f}"
-                )
-    if not flagship_leave_one_out.empty:
-        prompt.append("- Universe F clustered leave-one-parent-out Treasury ranges:")
-        for treatment in ["covered_bank_treated", "low_headroom_treated"]:
-            subset = flagship_leave_one_out[
-                (flagship_leave_one_out["treatment"] == treatment)
-                & (flagship_leave_one_out["outcome"] == "ust_inventory_fv_scaled")
-            ]
-            if subset.empty:
-                continue
-            prompt.append(
-                f"- `{treatment}`: omitted parents={subset['omitted_cluster'].nunique()}, "
-                f"coef range={subset['coef'].min():.4f} to {subset['coef'].max():.4f}, "
-                f"p range={subset['pvalue'].min():.4f} to {subset['pvalue'].max():.4f}"
-            )
-    prompt.extend(
-        [
-            "",
-            "## Audit artifacts",
-            "- Treatment roster with B/C/D/F membership and classification fields: `output/reports/event_2020/treatment_roster.csv`",
-            "- Versioned 2020 treatment map: `data/reference/insured_bank_treatment_map_2020.csv`",
-            "- Methodology memo: `output/reports/event_2020/methodology_memo.md`",
-            "",
-            "## Exact questions",
-            "1. Is the repo now at a reasonable stopping point for commit/push, given the weaker map-backed Treasury results and the current public framing?",
-            "2. Are there any remaining methodological or public-copy issues that are severe enough to block commit/push?",
-            "3. Does the current discreet roster disclosure and committed `treatment_roster.csv` solve the auditability problem of which banks are in the headline samples?",
-            "4. Which remaining ideas should be treated as explicitly post-stop backlog rather than pre-push work?",
-            "",
-            "## Required output",
-            "1. Verdict: `stop`, `stop with 1-2 fixes`, or `do not stop`",
-            "2. Findings ordered by severity, with concrete reasons",
-            "3. Any blocking or near-blocking fixes, limited to the minimum needed before commit/push",
-            "4. A short list of items that should stay in the backlog and not delay this push",
-            "5. Explicit note if the current public wording is appropriately cautious",
-        ]
-    )
-    output_path.write_text("\n".join(prompt) + "\n", encoding="utf-8")
 
 
 def _write_market_interaction_sensitivity(
@@ -2109,18 +1983,6 @@ def run_event_2020(
         flagship_clustered_pretrend,
         flagship_placebo,
         destination / "methodology_memo.md",
-    )
-    _write_gpt_pro_prompt(
-        sample_ladder,
-        sample_manifest,
-        primary_did,
-        expanded_did,
-        flagship_clustered_did,
-        primary_pretrend,
-        flagship_clustered_pretrend,
-        flagship_placebo,
-        flagship_leave_one_out,
-        destination / "gpt_pro_next_steps_prompt.md",
     )
     _write_market_control_sensitivity_note(
         universe_d,

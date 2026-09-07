@@ -130,6 +130,36 @@ async function loadSiteData() {
   return DATA;
 }
 
+function computeDotPlotDomain(rows) {
+  const coefficients = rows
+    .flatMap((row) => ['primary', 'expanded', 'flagship_clustered'].map((key) => row[key]?.coef))
+    .filter((value) => Number.isFinite(value));
+  if (!coefficients.length) {
+    return { min: -0.01, max: 0.01 };
+  }
+
+  let min = Math.min(...coefficients);
+  let max = Math.max(...coefficients);
+  min = Math.min(min, 0);
+  max = Math.max(max, 0);
+
+  const range = Math.max(max - min, 0.01);
+  const pad = Math.max(range * 0.15, 0.001);
+  return { min: min - pad, max: max + pad };
+}
+
+function buildLinearTicks(min, max, count) {
+  if (count <= 1) return [min];
+  const step = (max - min) / (count - 1);
+  return Array.from({ length: count }, (_, index) => min + (step * index));
+}
+
+const SURCHARGE_CHART_LAYOUT = {
+  width: 600,
+  height: 200,
+  margin: { top: 20, right: 30, bottom: 50, left: 170 }
+};
+
 function populateEventStudyStats() {
   if (!DATA || !DATA.eventStudy || !DATA.eventStudy.samples) return;
   const samples = DATA.eventStudy.samples;
@@ -186,19 +216,18 @@ function renderDotPlot() {
 
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart-svg' });
 
-  // scales
-  const xMin = -0.005, xMax = 0.035;
-  const xScale = v => margin.left + ((v - xMin) / (xMax - xMin)) * plotW;
+  const domain = computeDotPlotDomain(data);
+  const xScale = v => margin.left + ((v - domain.min) / (domain.max - domain.min)) * plotW;
   const rowH = plotH / data.length;
   const yPos = i => margin.top + i * rowH + rowH / 2;
 
   // grid + axis
-  const gridVals = [0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03];
+  const gridVals = buildLinearTicks(domain.min, domain.max, 7);
   gridVals.forEach(v => {
     const x = xScale(v);
     svg.appendChild(svgEl('line', { x1: x, y1: margin.top, x2: x, y2: H - margin.bottom, stroke: getCSS('--chart-grid'), 'stroke-width': 1 }));
     const label = svgEl('text', { x: x, y: H - margin.bottom + 18, 'text-anchor': 'middle', fill: getCSS('--chart-label'), 'font-size': '11', 'font-family': "'JetBrains Mono', monospace" });
-    label.textContent = v === 0 ? '0' : v.toFixed(3);
+    label.textContent = Math.abs(v) < 0.0005 ? '0' : v.toFixed(3);
     svg.appendChild(label);
   });
 
@@ -664,8 +693,7 @@ function renderSurchargeChart() {
   const container = clearChart('chart-surcharge');
   if (!container || !DATA || !DATA.parentTransmission) return;
 
-  const W = 550, H = 200;
-  const margin = { top: 20, right: 30, bottom: 50, left: 130 };
+  const { width: W, height: H, margin } = SURCHARGE_CHART_LAYOUT;
   const plotW = W - margin.left - margin.right;
   const plotH = H - margin.top - margin.bottom;
 

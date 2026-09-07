@@ -40,9 +40,9 @@ The repo now carries an explicit 2020 insured-bank treatment map. That makes the
 - Low headroom: -0.59pp (p = 0.690)
 - Covered bank / direct eligibility: -0.23pp (p = 0.911)
 
-Under parent-level clustering, neither Treasury split shows a reliable positive effect. The broader direct-eligibility treatment is still the cleaner regulatory split, but the current evidence is inconclusive rather than supportive.
+Under parent-level clustering, neither Treasury split shows a reliable positive effect. The broader direct-eligibility treatment is still the cleaner repo-maintained direct-treatment split, but the current evidence is inconclusive rather than supportive.
 
-The diagnostics are cleaner than the coefficient signal. In Universe D, the Treasury pre-trend joint p-values are 0.826 for the low-headroom split and 0.933 for the covered-bank split; in the clustered flagship sample they are 0.163 and 0.266. The three-placebo grid is also quiet for both Treasury rows, with covered-bank placebo p-values of 0.492, 0.364, and 0.293. But the leave-one-parent-out ranges still cross zero for both treatments, so the right public framing is that the map-backed direct-treatment design is cleaner while the Treasury effect itself is currently weak.
+The diagnostics are cleaner than the coefficient signal. In Universe D, the Treasury pre-trend joint p-values are 0.826 for the low-headroom split and 0.933 for the covered-bank split; in the clustered flagship sample they are 0.163 and 0.266. The three-placebo grid is also quiet for both Treasury rows, with covered-bank placebo p-values of 0.492, 0.364, and 0.293. But the leave-one-parent-out ranges still cross zero for both treatments, so the right public framing is that the map-backed direct-treatment design is more explicit while the Treasury effect itself is currently weak.
 
 ## Mechanism evidence
 
@@ -110,6 +110,9 @@ python -m slr_watch.cli stage-call-reports --quarter 2020Q1
 python -m slr_watch.cli download-fry9c --quarter 2025Q4
 python -m slr_watch.cli stage-fry9c --quarter 2025Q4 --input data/raw/fry9c/2025Q4/BHCF20251231.ZIP
 
+# Call Report ZIP extraction is temporary. Staging retains only compact identity
+# and normalized Parquet tables; the source ZIP remains the raw artifact.
+
 # Build panels
 python -m slr_watch.cli build-crosswalk
 python -m slr_watch.cli build-fdic-institutions
@@ -128,7 +131,7 @@ python -m slr_watch.cli run-constraint-decomposition-report
 python -m slr_watch.cli build-site-data
 ```
 
-The event-study pipeline now writes `output/reports/event_2020/sample_manifest.csv`, `sample_ladder.csv`, `treatment_roster.csv`, `methodology_memo.md`, and `gpt_pro_next_steps_prompt.md` so the exact descriptive universe, causal sample ladder, treatment-map classification, exclusion reasons, and next-question handoff are explicit.
+The event-study pipeline now writes `output/reports/event_2020/sample_manifest.csv`, `sample_ladder.csv`, `treatment_roster.csv`, and `methodology_memo.md` so the exact descriptive universe, causal sample ladder, treatment-map classification, and exclusion reasons are explicit.
 
 If you need to inspect which banks sit in the current 19-bank Treasury core or the 16-bank clustered flagship sample, use `output/reports/event_2020/treatment_roster.csv`; the site keeps that roster in a collapsed audit note instead of putting another visible table in the main narrative.
 

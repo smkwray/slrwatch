@@ -129,7 +129,6 @@ def test_run_event_2020_smoke(tmp_path: Path):
     assert (output_dir / "sample_ladder.csv").exists()
     assert (output_dir / "sample_ladder.md").exists()
     assert (output_dir / "methodology_memo.md").exists()
-    assert (output_dir / "gpt_pro_next_steps_prompt.md").exists()
     assert (output_dir / "pretrend_checks.csv").exists()
     assert (output_dir / "pretrend_checks.md").exists()
     assert (output_dir / "expanded_sensitivity" / "prepared_panel.csv").exists()
@@ -218,11 +217,10 @@ def test_run_event_2020_smoke(tmp_path: Path):
     manifest_note = (output_dir / "sample_manifest.md").read_text(encoding="utf-8")
     assert "Event Study Sample Manifest" in manifest_note
     assert "Universe D" in manifest_note
-    prompt_note = (output_dir / "gpt_pro_next_steps_prompt.md").read_text(encoding="utf-8")
-    assert "Stability across D/E/F" in prompt_note
-    assert "## Diagnostics" in prompt_note
-    assert "leave-one-parent-out" in prompt_note.lower()
-    assert "Verdict: `stop`, `stop with 1-2 fixes`, or `do not stop`" in prompt_note
+    methodology_note = (output_dir / "methodology_memo.md").read_text(encoding="utf-8")
+    assert "## Diagnostics" in methodology_note
+    assert "leave-one-parent-out" in methodology_note.lower()
+    assert "Flagship clustered pretrend checks" in methodology_note
     pretrend_note = (output_dir / "pretrend_checks.md").read_text(encoding="utf-8")
     pretrend_clustered_note = (output_dir / "flagship_per_parent_clustered" / "pretrend_checks.md").read_text(encoding="utf-8")
     placebo_note = (output_dir / "flagship_per_parent_clustered" / "placebo_fake_date.md").read_text(encoding="utf-8")

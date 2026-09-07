@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from slr_watch.ingest.call_reports import build_call_report_identity_frame
 from slr_watch.insured_banks import build_all_insured_bank_panel
 
 
@@ -10,7 +11,10 @@ def _write_stage_pair(root: Path, quarter_end: pd.Timestamp, normalized: pd.Data
     quarter_dir = root / f"{quarter_end.year}Q{((quarter_end.month - 1) // 3) + 1}"
     quarter_dir.mkdir(parents=True, exist_ok=True)
     normalized.to_parquet(quarter_dir / "call_reports_normalized.parquet", index=False)
-    merged.to_parquet(quarter_dir / "call_reports_merged.parquet", index=False)
+    build_call_report_identity_frame(merged).to_parquet(
+        quarter_dir / "call_reports_identity.parquet",
+        index=False,
+    )
 
 
 def test_build_all_insured_bank_panel_generates_universe_and_sample_flags(tmp_path: Path) -> None:

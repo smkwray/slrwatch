@@ -602,7 +602,7 @@ def _write_summary(
             f"{row['first_quarter'].date()} to {row['last_quarter'].date()}"
         )
     if not coverage_manifest.empty:
-        lines.append(f"- Detailed entity-level coverage: `{output_path.parent / 'coverage_manifest.csv'}`")
+        lines.append("- Detailed entity-level coverage: `output/reports/constraint_decomposition/coverage_manifest.csv`")
 
     insured = coverage_by_source.get("insured_bank")
     parent = coverage_by_source.get("parent_or_ihc")

@@ -48,9 +48,12 @@ def test_stage_call_report_zip(tmp_path: Path):
     with ZipFile(zip_path, "w") as archive:
         archive.writestr("ffiec_cdr_call_bulk_all_schedules_03312020/RCON_schedule.txt", schedule)
 
-    _, normalized_path = stage_call_report_zip(zip_path, output_dir=tmp_path / "staged")
+    identity_path, normalized_path = stage_call_report_zip(zip_path, output_dir=tmp_path / "staged")
     frame = pd.read_parquet(normalized_path)
 
+    assert identity_path.name == "call_reports_identity.parquet"
+    assert identity_path.exists()
+    assert not (tmp_path / "staged" / "extracted").exists()
     assert frame.loc[0, "rssd_id"] == "1111"
     assert frame.loc[0, "quarter_end"] == "2020-03-31"
     assert frame.loc[0, "tier1_capital"] == 55
@@ -76,9 +79,11 @@ def test_stage_call_report_zip_skips_narrative_schedule(tmp_path: Path):
         archive.writestr("ffiec_cdr_call_bulk_all_schedules_12312022/RCON_schedule.txt", numeric_schedule)
         archive.writestr("ffiec_cdr_call_bulk_all_schedules_12312022/FFIEC CDR Call Schedule NARR 12312022.txt", narrative_schedule)
 
-    _, normalized_path = stage_call_report_zip(zip_path, output_dir=tmp_path / "staged")
+    identity_path, normalized_path = stage_call_report_zip(zip_path, output_dir=tmp_path / "staged")
     frame = pd.read_parquet(normalized_path)
 
+    assert identity_path.exists()
+    assert not (tmp_path / "staged" / "extracted").exists()
     assert frame.loc[0, "rssd_id"] == "1111"
     assert frame.loc[0, "tier1_capital"] == 55
     assert frame.loc[0, "total_leverage_exposure"] == 1000

@@ -253,7 +253,7 @@ def _write_summary(
         f"- Unique bank subsidiaries: {n_banks}",
         f"- Unique parent families: {n_families}",
         f"- Quarters covered: {n_quarters} ({q_min} to {q_max})",
-        f"- Detailed coverage manifest: `{output_dir / 'coverage_manifest.csv'}`",
+        "- Detailed coverage manifest: `output/reports/parent_transmission/coverage_manifest.csv`",
         "",
         "## Directional Co-movement",
     ]

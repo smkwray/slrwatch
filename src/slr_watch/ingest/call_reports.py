@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 import shutil
+from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 import pandas as pd
@@ -26,6 +27,17 @@ DEFAULT_HEADERS = {
         "Chrome/122.0.0.0 Safari/537.36"
     )
 }
+CALL_REPORT_IDENTITY_COLUMN_MAP = {
+    "RSSD9001": "rssd_id",
+    "RSSD9017": "entity_name_raw",
+    "RSSD9050": "fdic_cert_raw",
+    "RSSD9130": "hq_city",
+    "RSSD9200": "hq_state",
+    "RSSD9220": "hq_zip",
+}
+CALL_REPORT_IDENTITY_FILENAME = "call_reports_identity.parquet"
+CALL_REPORT_MERGED_FILENAME = "call_reports_merged.parquet"
+CALL_REPORT_NORMALIZED_FILENAME = "call_reports_normalized.parquet"
 
 
 @dataclass(frozen=True)
@@ -212,6 +224,16 @@ def write_merged_call_report_bulk_folder(root: Path, output_path: Path) -> Path:
     return write_frame(merged, output_path)
 
 
+def build_call_report_identity_frame(merged: pd.DataFrame) -> pd.DataFrame:
+    identity = merged.reindex(columns=CALL_REPORT_IDENTITY_COLUMN_MAP).rename(
+        columns=CALL_REPORT_IDENTITY_COLUMN_MAP
+    )
+    identity["rssd_id"] = identity["rssd_id"].astype("string").str.strip()
+    for column in ["entity_name_raw", "fdic_cert_raw", "hq_city", "hq_state", "hq_zip"]:
+        identity[column] = identity[column].astype("string").str.strip()
+    return identity.drop_duplicates("rssd_id").reset_index(drop=True)
+
+
 def stage_call_report_folder(
     root: Path,
     *,
@@ -222,17 +244,17 @@ def stage_call_report_folder(
     destination.mkdir(parents=True, exist_ok=True)
 
     merged = merge_call_report_bulk_folder(root)
-    merged_path = destination / "call_reports_merged.parquet"
-    write_frame(merged, merged_path)
+    identity_path = destination / CALL_REPORT_IDENTITY_FILENAME
+    write_frame(build_call_report_identity_frame(merged), identity_path)
 
     normalized = normalize_source_frame(
         merged,
         source_name="call_report",
         quarter_end=quarter.quarter_end_iso,
     )
-    normalized_path = destination / "call_reports_normalized.parquet"
+    normalized_path = destination / CALL_REPORT_NORMALIZED_FILENAME
     write_frame(normalized, normalized_path)
-    return merged_path, normalized_path
+    return identity_path, normalized_path
 
 
 def stage_call_report_zip(
@@ -243,6 +265,6 @@ def stage_call_report_zip(
 ) -> tuple[Path, Path]:
     inferred_quarter = quarter or quarter_from_bulk_filename(zip_path.name)
     destination = output_dir or staging_data_path("call_reports", inferred_quarter.label)
-    extract_dir = destination / "extracted"
-    extract_call_report_zip(zip_path, extract_dir)
-    return stage_call_report_folder(extract_dir, quarter=inferred_quarter, output_dir=destination)
+    with TemporaryDirectory(prefix=f"slrwatch-call-report-{inferred_quarter.label}-") as temp_dir:
+        extract_dir = extract_call_report_zip(zip_path, Path(temp_dir))
+        return stage_call_report_folder(extract_dir, quarter=inferred_quarter, output_dir=destination)
