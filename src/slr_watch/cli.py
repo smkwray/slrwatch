@@ -13,7 +13,7 @@ from .analytics.policy_regime_panel import run_policy_regime_panel_report
 from .analytics.reallocation_2020 import run_reallocation_report
 from .analytics.safe_asset_absorption import run_absorption_report
 from .analytics.treasury_intermediation import run_treasury_intermediation_report
-from .config import data_path, derived_data_path, raw_data_path, reference_data_path, repo_root, reports_path
+from .config import data_path, derived_data_path, raw_data_path, reference_data_path, reports_path
 from .ingest.call_reports import (
     download_call_report_bulk_zip,
     stage_call_report_folder,
@@ -30,7 +30,6 @@ from .insured_banks import build_all_insured_bank_panel, ensure_insured_bank_ove
 from .panels import build_crosswalk, build_insured_bank_panel, build_parent_panel
 from .quarters import QuarterRef
 from .source_manifest import format_sources_for_cli
-from .site_data import build_site_data
 
 
 def cmd_print_sources(_: argparse.Namespace) -> int:
@@ -283,16 +282,6 @@ def cmd_run_constraint_decomposition_report(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_build_site_data(args: argparse.Namespace) -> int:
-    written = build_site_data(
-        reports_root=Path(args.reports_root) if args.reports_root else None,
-        output_dir=Path(args.output_dir) if args.output_dir else None,
-    )
-    for path in written:
-        print(f"Wrote {path}")
-    return 0
-
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="slr-watch")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -442,10 +431,6 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output-dir", default=str(reports_path("constraint_decomposition")))
     p.set_defaults(func=cmd_run_constraint_decomposition_report)
 
-    p = sub.add_parser("build-site-data", help="Build static-site JSON payloads from report outputs")
-    p.add_argument("--reports-root", default=str(reports_path()))
-    p.add_argument("--output-dir", default=str(repo_root() / "site" / "assets" / "data"))
-    p.set_defaults(func=cmd_build_site_data)
     return parser
 
 

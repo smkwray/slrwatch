@@ -35,6 +35,7 @@ coverage/
 .venv/
 venv/
 node_modules/
+site/
 
 # Private local configuration
 .private-denylist

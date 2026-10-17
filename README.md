@@ -23,8 +23,7 @@ themselves establish causal identification.
 Reallocation, safe-asset composition, parent-bank co-movement, and constraint
 scorecards provide descriptive context. Their associations and classifications
 are not separately identified causal mechanisms or estimates of the Treasury
-Deposit Component. The [research site](https://smkwray.github.io/slrwatch/)
-presents the event study and supporting diagnostics.
+Deposit Component.
 
 ## Install and validate
 
@@ -39,9 +38,9 @@ ruff check .
 python -m slr_watch.cli --help
 ```
 
-The default suite uses synthetic inputs and committed display assets. After
-rebuilding the empirical reports, `python -B -m pytest -q -m integration` checks
-the public site against those reports; missing inputs fail that lane.
+The default suite uses synthetic inputs. After rebuilding the empirical reports,
+`python -B -m pytest -q -m integration` checks the reported coefficients and
+diagnostics against the README; missing inputs fail that lane.
 
 For the locked analysis environment, install `requirements.lock` before the
 editable package. Browser-assisted FR Y-9C acquisition is optional:
@@ -85,7 +84,7 @@ python -m slr_watch.cli build-parent-panel
 python -m slr_watch.cli run-event-study
 ```
 
-`make reproduce` runs the configured analysis and site-data sequence. Individual
+`make reproduce` runs the configured analysis sequence. Individual
 commands expose the reallocation, safe-asset, parent-transmission, intermediation,
 policy-regime, and constraint-decomposition reports; see the CLI help.
 
@@ -95,10 +94,6 @@ policy-regime, and constraint-decomposition reports; see the CLI help.
 sample ladder, treatment roster, and methodology memo. Other reports retain their
 own samples and definitions. Raw, staged, and derived data under `data/` and
 analysis outputs under `output/` are local, generated files ignored by Git,
-except the two small constraint-decomposition summaries retained for public-copy
-validation.
-
-`site/` contains the curated research-site assets. Serve it locally with
-`python -m http.server 8000 --directory site`.
+except two compact constraint-decomposition summaries.
 
 See [LICENSE](LICENSE) for license terms.
