@@ -41,7 +41,7 @@ class FRY15Link:
 
 def parse_fry15_snapshot_links(html: str) -> list[FRY15Link]:
     soup = BeautifulSoup(html, "html.parser")
-    anchors = soup.find_all("a", href=True)
+    _anchors = soup.find_all("a", href=True)
     links: list[FRY15Link] = []
 
     current_report_date: str | None = None

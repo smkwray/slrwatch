@@ -7,10 +7,11 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-logger = logging.getLogger(__name__)
-
 from ..config import derived_data_path
 from ..pipeline import write_frame
+
+logger = logging.getLogger(__name__)
+
 
 NYFED_PRIMARY_DEALER_DICTIONARY_URL = "https://markets.newyorkfed.org/api/pd/list/timeseries.json"
 NYFED_PRIMARY_DEALER_READ_URL = "https://markets.newyorkfed.org/read"

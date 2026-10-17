@@ -178,7 +178,7 @@ def test_run_event_2020_smoke(tmp_path: Path):
         "included_universe_d",
         "included_universe_f_primary",
     }
-    assert treatment_roster.loc[treatment_roster["entity_id"] == "bank_1", "di_relief_eligible_2020"].iloc[0] == True
+    assert treatment_roster.loc[treatment_roster["entity_id"] == "bank_1", "di_relief_eligible_2020"].iloc[0]
     manifest = pd.read_csv(output_dir / "sample_manifest.csv")
     synthetic_manifest = manifest[manifest["entity_id"].str.startswith("bank_")].copy()
     assert synthetic_manifest["included_universe_b"].sum() == 6

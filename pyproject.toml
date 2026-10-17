@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "slr-watch"
 version = "0.1.0"
-description = "Starter repo for a large-bank SLR and Treasury-capacity monitor"
+description = "Public-data analysis of bank leverage constraints and Treasury holdings"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["ruff>=0.6", "pytest>=8.0"]
 browser = ["playwright>=1.58"]
 
 [project.scripts]
@@ -34,6 +34,11 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.pytest.ini_options]
-addopts = ["-p", "no:cacheprovider"]
+addopts = ["-p", "no:cacheprovider", "-m", "not integration"]
+markers = ["integration: requires locally rebuilt empirical reports"]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff.lint]
+# Explicit correctness checks independent of Ruff version defaults.
+select = ["E4", "E7", "E9", "F"]

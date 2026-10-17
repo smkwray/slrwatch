@@ -3,9 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from enum import Enum
-from typing import Optional
 
-from .models import EntityRegulatoryProfile, EntityType
+from .models import EntityRegulatoryProfile
 
 
 PRE_2026_EFFECTIVE_END = date(2025, 12, 31)

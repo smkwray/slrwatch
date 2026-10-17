@@ -35,3 +35,13 @@ coverage/
 .venv/
 venv/
 node_modules/
+
+# Private local configuration
+.private-denylist
+.*-private-denylist
+AGENTS.md
+CLAUDE.md
+.codex/
+.claude/
+.cursor/
+.worktrees/

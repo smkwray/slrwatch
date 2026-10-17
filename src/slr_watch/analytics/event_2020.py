@@ -1846,7 +1846,7 @@ def run_event_2020(
         sample_label="Universe F flagship primary clustered",
         cluster_col="top_parent_rssd",
     )
-    flagship_leave_one_out = _write_leave_one_parent_out(
+    _flagship_leave_one_out = _write_leave_one_parent_out(
         universe_f_primary,
         flagship_clustered_dir,
         sample_label="Universe F flagship primary clustered",

@@ -205,7 +205,7 @@ def test_build_all_insured_bank_panel_generates_universe_and_sample_flags(tmp_pa
     assert universe.loc[universe["entity_id"] == "alpha_bank", "slr_scope_class"].iloc[0] == "covered_bank_subsidiary"
     assert str(universe.loc[universe["entity_id"] == "alpha_bank", "top_parent_rssd_2019q4"].iloc[0]) == "9101"
     assert universe.loc[universe["entity_id"] == "alpha_bank", "classification_source"].iloc[0] == "treatment_map_2020"
-    assert universe.loc[universe["entity_id"] == "gamma_bank", "is_covered_bank_subsidiary"].iloc[0] == False
+    assert not universe.loc[universe["entity_id"] == "gamma_bank", "is_covered_bank_subsidiary"].iloc[0]
     assert universe.loc[universe["entity_id"] == "gamma_bank", "treatment_scope_2020"].iloc[0] == "parent_hc_relief_scope"
     assert str(universe.loc[universe["entity_id"] == "insured_bank_rssd_1002", "top_parent_rssd"].iloc[0]) == "99002"
     assert universe.loc[universe["entity_id"] == "insured_bank_rssd_1002", "classification_source"].iloc[0] == "fdic_fallback"
