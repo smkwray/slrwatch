@@ -1,31 +1,18 @@
 # SLR Watch
 
-SLR Watch studies large-bank Treasury holdings and balance-sheet constraints
-using public regulatory filings and market data. Its event study examines the
-2020 temporary exclusion of Treasury securities and reserve balances from the
-Supplementary Leverage Ratio (SLR). Separate descriptive modules compare leverage
-headroom, duration losses, and funding stress across banks and parent companies.
+SLR Watch analyzes large US bank Treasury holdings and balance-sheet leverage constraints from public regulatory filings and market data. It downloads and normalizes quarterly FFIEC Call Reports, FR Y-9C holding-company filings, and market overlays; builds insured-bank and parent panels; and runs an event study of the 2020 temporary exclusion of Treasury securities and reserve balances from the Supplementary Leverage Ratio (SLR) alongside six descriptive balance-sheet and market reports.
 
-## Findings and interpretation
+## Data
 
-The parent-clustered Treasury estimates do not show a reliable positive effect
-of the 2020 exclusion. The sample with 16 parent clusters estimates a −0.59 percentage-point
-Treasury-share difference for low-headroom banks (p = 0.690) and a −0.23
-percentage-point difference for directly eligible banks (p = 0.911).
-Leave-one-parent-out ranges cross zero. These results are inconclusive; they do
-not support a general claim that SLR relief increases Treasury absorption.
+All inputs are public and require no API keys. Run `slr-watch print-sources` to inspect the full manifest in `config/source_manifest.yml`.
 
-Treatment assignment requires a usable 2019Q4 baseline. The project keeps the full descriptive universe, treatment-definable sample,
-balanced panel, and parent-clustered sample distinct. Sample rosters and exclusion
-reasons accompany the event study. Pretrend and placebo diagnostics do not by
-themselves establish causal identification.
+- FFIEC Call Reports (Central Data Repository bulk ZIPs): quarterly insured-bank balance sheets.
+- FR Y-9C: quarterly bank holding company and intermediate holding company balance sheets (direct Chicago Fed CSV archive for 1986Q3–2021Q1; FFIEC National Information Center ZIP via Playwright or `--zip-path` for 2021Q2 onward).
+- FDIC Institutions metadata API (`build-fdic-institutions`): charter and parent-hierarchy reference.
+- FR Y-15 snapshots and OFR Bank Systemic Risk Monitor (`build-fry15-overlay`): annual G-SIB Method 1 surcharge overlay.
+- NY Fed Primary Dealer Statistics API (`build-primary-dealer-overlay`, dealer positions in USD millions) and FINRA TRACE Treasury aggregates (`build-trace-overlay`, manual CSV or XLSX input in USD billions): quarterly market overlays combined by `build-market-overlay-panel`.
 
-Reallocation, safe-asset composition, parent-bank co-movement, and constraint
-scorecards provide descriptive context. Their associations and classifications
-are not separately identified causal mechanisms or estimates of the Treasury
-Deposit Component.
-
-## Install and validate
+## Install
 
 Python 3.11 or later is required. From the repository root:
 
@@ -33,67 +20,75 @@ Python 3.11 or later is required. From the repository root:
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
-python -B -m pytest -q
-ruff check .
-python -m slr_watch.cli --help
 ```
 
-The default suite uses synthetic inputs. After rebuilding the empirical reports,
-`python -B -m pytest -q -m integration` checks the reported coefficients and
-diagnostics against the README; missing inputs fail that lane.
-
-For the locked analysis environment, install `requirements.lock` before the
-editable package. Browser-assisted FR Y-9C acquisition is optional:
+To use the locked dependency set, run `python -m pip install -r requirements.lock` before installing the editable package. For browser-assisted FR Y-9C and FR Y-15 downloads:
 
 ```bash
 python -m pip install -e '.[browser]'
 python -m playwright install chromium
 ```
 
-## Sources and workflow
+## Usage
 
-| Source | Role |
-|---|---|
-| FFIEC Call Reports | Insured-bank quarterly balance sheets |
-| FR Y-9C | Parent holding-company balance sheets |
-| FR Y-15 and OFR | Systemic-risk and surcharge context |
-| NY Fed primary dealer statistics | Intermediation context |
-| FINRA TRACE Treasury aggregates | Trading context |
-
-Download and stage the quarters required by the configured sample. For example:
+Download and stage the quarters required for your sample (examples):
 
 ```bash
-python -m slr_watch.cli download-call-reports --quarter 2020Q1
-python -m slr_watch.cli stage-call-reports --quarter 2020Q1
-python -m slr_watch.cli download-fry9c --quarter 2025Q4
-python -m slr_watch.cli stage-fry9c --quarter 2025Q4 --input data/raw/fry9c/2025Q4/BHCF20251231.ZIP
+slr-watch download-call-reports --quarter 2020Q1
+slr-watch stage-call-reports --quarter 2020Q1
+slr-watch download-fry9c --quarter 2025Q4
+slr-watch stage-fry9c --quarter 2025Q4 --input data/raw/fry9c/2025Q4/BHCF20251231.ZIP
 ```
 
-Call Report extraction is temporary; normalized identity and Parquet tables are
-retained alongside the source ZIP. If browser acquisition is blocked, place the
-required FR Y-9C ZIP in its raw quarter directory and rerun staging.
+Call Report ZIPs are extracted to a temporary directory during staging; compact identity and normalized Parquet tables are saved under `data/staging/`. If automated NIC downloads are blocked, download the `BHCFYYYYMMDD.ZIP` archive manually and pass it to `download-fry9c --zip-path` or `stage-fry9c --input`.
 
-After supplying the required source quarters:
+Build the crosswalk, panels, and 2020 event study:
 
 ```bash
-python -m slr_watch.cli build-crosswalk
-python -m slr_watch.cli build-fdic-institutions
-python -m slr_watch.cli build-all-insured-panel
-python -m slr_watch.cli build-insured-panel
-python -m slr_watch.cli build-parent-panel
-python -m slr_watch.cli run-event-study
+slr-watch build-crosswalk
+slr-watch build-fdic-institutions
+slr-watch build-all-insured-panel
+slr-watch build-insured-panel
+slr-watch build-parent-panel
+slr-watch run-event-study
 ```
 
-`make reproduce` runs the configured analysis sequence. Individual
-commands expose the reallocation, safe-asset, parent-transmission, intermediation,
-policy-regime, and constraint-decomposition reports; see the CLI help.
+Run `make reproduce` to build the panels and all seven reports (event study, reallocation, safe-asset absorption, parent transmission, Treasury intermediation, policy-regime panel, and constraint decomposition). `python -m slr_watch.cli` invokes the same interface; run `slr-watch --help` for all commands, including `demo-headroom`.
 
-## Outputs
+## Output
 
-`output/reports/event_2020/` contains the event-study estimates, sample manifest,
-sample ladder, treatment roster, and methodology memo. Other reports retain their
-own samples and definitions. Raw, staged, and derived data under `data/` and
-analysis outputs under `output/` are local, generated files ignored by Git,
-except two compact constraint-decomposition summaries.
+Raw downloads, staged filings, derived panels, and generated reports under `data/` and `output/` are local and ignored by Git, except two tracked summary CSVs under `output/reports/constraint_decomposition/`.
 
-See [LICENSE](LICENSE) for license terms.
+| Path | Description |
+| --- | --- |
+| `data/derived/insured_bank_panel.parquet` | Quarterly insured-bank balance-sheet, Treasury-share, and SLR-headroom panel |
+| `data/derived/parent_panel.parquet` | Quarterly holding-company balance-sheet and leverage panel |
+| `output/reports/event_2020/` | 2020 SLR exclusion difference-in-differences estimates, parent-clustered checks, placebos, sample rosters, and methodology memo |
+| `output/reports/` | Additional report folders for reallocation, safe-asset absorption, parent transmission, Treasury intermediation, policy-regime panel, and constraint decomposition |
+
+## Event-study results and limits
+
+In the parent-clustered 2020 SLR exclusion event study (16 parent clusters), estimated Treasury-share differences are negative and statistically indistinguishable from zero: -0.59 percentage-point for low-headroom banks (p = 0.690) and -0.23 percentage-point for directly eligible banks (p = 0.911). Leave-one-parent-out estimates cross zero for both specifications. These results are inconclusive and do not support a claim that SLR relief increased bank Treasury absorption.
+
+- Treatment assignment requires a usable 2019Q4 baseline and is held fixed on that baseline across samples. The event-study tables keep the full descriptive universe, treatment-definable sample, balanced panel, and parent-clustered sample distinct.
+- Pretrend and placebo checks do not establish causal identification.
+- The reallocation, safe-asset, parent-transmission, intermediation, policy-regime, and constraint-decomposition reports are descriptive and do not estimate causal mechanisms or the Treasury Deposit Component.
+
+## Tests
+
+The default suite uses synthetic inputs and runs offline:
+
+```bash
+python -B -m pytest -q
+ruff check .
+```
+
+After rebuilding the empirical reports locally, run the integration test to verify the event-study figures reported in this README against `output/reports/event_2020/`:
+
+```bash
+python -B -m pytest -q -m integration
+```
+
+## License
+
+MIT. See `LICENSE`.
